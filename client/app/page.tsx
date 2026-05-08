@@ -17,10 +17,12 @@ import {
   LineChart,
   Trophy,
   Target,
-  TrendingUp
+  TrendingUp,
+  Plus,
+  Minus
 } from "lucide-react";
 import { MarketTicker } from "@/components/market-ticker";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
@@ -47,9 +49,34 @@ const STEPS = [
   }
 ];
 
+const FAQS = [
+  {
+    q: "Is this course suitable for complete beginners?",
+    a: "Absolutely. Our 'Month 01' is specifically designed to take someone from zero knowledge to a solid understanding of market foundations. We don't assume any prior experience."
+  },
+  {
+    q: "Do I need a high-end PC to start trading?",
+    a: "Not at all. While a good setup helps eventually, all you need to start is a laptop or even a smartphone with a stable internet connection. Our platform is fully web-based."
+  },
+  {
+    q: "How long until I become a profitable trader?",
+    a: "Trading is a skill, like learning an instrument. While our roadmap covers 90 days of intensive training, profitability depends on your discipline and practice. We provide the tools; you provide the effort."
+  },
+  {
+    q: "Will I get direct mentorship from Krishna?",
+    a: "Yes. Our batches include live sessions and community access where Krishna and other expert mentors review setups and answer questions directly."
+  }
+];
+
 export default function Home() {
   const [activeStep, setActiveStep] = useState(0);
   const [realStats, setRealStats] = useState<{ students: string, completion: string, revenue: string } | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const faqRef = useRef<HTMLDivElement>(null);
+
+  const scrollToFaqs = () => {
+    faqRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     fetch('http://localhost:5000/api/stats/overview')
@@ -248,6 +275,41 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section ref={faqRef} className="py-32 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-xs font-black text-emerald-500 uppercase tracking-[0.4em] mb-4">Questions & Answers</h2>
+            <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Common Inquiries</h3>
+          </div>
+
+          <div className="space-y-4">
+            {FAQS.map((faq, idx) => (
+              <div
+                key={idx}
+                className="rounded-[2rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
+                >
+                  <span className="text-lg font-black text-slate-900 dark:text-white">{faq.q}</span>
+                  {openFaq === idx ? <Minus className="w-5 h-5 text-emerald-500" /> : <Plus className="w-5 h-5 text-slate-400" />}
+                </button>
+                <div className={cn(
+                  "transition-all duration-500 ease-in-out overflow-hidden",
+                  openFaq === idx ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                )}>
+                  <div className="px-8 pb-8 text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                    {faq.a}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-24 max-w-7xl mx-auto px-6 mb-24">
         <div className="p-12 md:p-20 rounded-[4rem] bg-emerald-600 relative overflow-hidden group">
@@ -263,8 +325,8 @@ export default function Home() {
               <Link href="/course" className="bg-white text-emerald-600 px-12 py-5 rounded-3xl text-lg font-black transition-all hover:scale-105 shadow-2xl active:scale-95">
                 Apply Now
               </Link>
-              <Link href="/portal" className="text-white border-2 border-white/20 hover:border-white px-12 py-5 rounded-3xl text-lg font-black transition-all backdrop-blur-sm active:scale-95">
-                View FAQ
+              <Link href="/contact" className="text-white border-2 border-white/20 hover:border-white px-12 py-5 rounded-3xl text-lg font-black transition-all backdrop-blur-sm active:scale-95">
+                Contact Us
               </Link>
             </div>
           </div>
