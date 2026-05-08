@@ -36,7 +36,7 @@ export function Navbar() {
           .then(data => {
             setHasEnrolledBatches((data.enrolledBatches?.length ?? 0) > 0);
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     }
 
@@ -85,7 +85,7 @@ export function Navbar() {
                 key={link.name}
                 href={link.href}
                 className={cn(
-                  "relative px-4 py-2 transition-colors hover:text-emerald-500",
+                  "relative px-4 py-1 transition-colors hover:text-emerald-500",
                   isActive ? "text-emerald-500" : "text-slate-500 dark:text-slate-400"
                 )}
               >

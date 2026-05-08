@@ -2,6 +2,8 @@ import express from 'express';
 import Batch from '../models/Batch.js';
 import Course from '../models/Course.js';
 import User from '../models/User.js';
+import { validate } from '../middleware/validate.js';
+import { createBatchSchema, enrollStudentSchema, switchStudentSchema } from '../schemas/batchSchemas.js';
 
 const router = express.Router();
 
@@ -31,7 +33,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create a new batch
-router.post('/', async (req, res) => {
+router.post('/', validate(createBatchSchema), async (req, res) => {
   try {
     const { courseId } = req.body;
 
@@ -88,7 +90,7 @@ router.post('/', async (req, res) => {
 // ── Student Enrollment ───────────────────────────────────────────────────────
 
 // Add a student to a batch
-router.post('/:id/students', async (req, res) => {
+router.post('/:id/students', validate(enrollStudentSchema), async (req, res) => {
   try {
     const { userId } = req.body;
     const batch = await Batch.findById(req.params.id);
@@ -122,7 +124,7 @@ router.post('/:id/students', async (req, res) => {
 });
 
 // Switch a student from one batch to another
-router.post('/switch-student', async (req, res) => {
+router.post('/switch-student', validate(switchStudentSchema), async (req, res) => {
   try {
     const { userId, fromBatchId, toBatchId } = req.body;
     if (!userId || !fromBatchId || !toBatchId) {

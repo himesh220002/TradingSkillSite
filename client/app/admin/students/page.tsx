@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Users,
   Search,
@@ -21,6 +21,9 @@ import {
 } from "lucide-react";
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface EnrolledBatch {
   _id: string;
@@ -43,7 +46,7 @@ interface Student {
   linkedin?: string;
   github?: string;
   role: 'student' | 'admin';
-  enrolledBatches: any[]; // Populated as EnrolledBatch when viewing profile
+  enrolledBatches: any[]; 
   createdAt: string;
 }
 
@@ -53,11 +56,21 @@ interface Batch {
   courseId: { title: string };
 }
 
+// Simple Cache Store
+const cache: { students: Student[] | null, batches: Batch[] | null } = {
+  students: null,
+  batches: null
+};
+
 export default function AdminStudents() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [batches, setBatches] = useState<Batch[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [students, setStudents] = useState<Student[]>(cache.students || []);
+  const [batches, setBatches] = useState<Batch[]>(cache.batches || []);
+  const [loading, setLoading] = useState(!cache.students);
+  const [error, setError] = useState<string | null>(null);
+  
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+  
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Profile modal state
@@ -70,32 +83,48 @@ export default function AdminStudents() {
   const [enrolling, setEnrolling] = useState(false);
   const [enrollMsg, setEnrollMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
+  const fetchAll = useCallback(async (force = false) => {
+    if (!force && cache.students && cache.batches) {
+      return;
+    }
 
-  const fetchAll = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const [usersRes, batchesRes] = await Promise.all([
         fetch('http://localhost:5000/api/auth/users'),
         fetch('http://localhost:5000/api/batches'),
       ]);
+
+      if (!usersRes.ok || !batchesRes.ok) throw new Error("Failed to fetch data");
+
       const users = await usersRes.json();
       const batchData = await batchesRes.json();
+      
       setStudents(users);
       setBatches(batchData);
+      
+      // Update Cache
+      cache.students = users;
+      cache.batches = batchData;
     } catch (err) {
+      setError("Network error: Could not reach the server. Please ensure the backend is running.");
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const fetchProfile = async (userId: string) => {
     setProfileLoading(true);
     setProfileModal({ open: true, student: null });
     try {
       const res = await fetch(`http://localhost:5000/api/auth/profile/${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch profile");
       const data = await res.json();
       setProfileModal({ open: true, student: data });
     } catch (err) {
@@ -130,8 +159,7 @@ export default function AdminStudents() {
       const data = await res.json();
       if (res.ok) {
         setEnrollMsg({ type: 'success', text: 'Student enrolled successfully!' });
-        fetchAll(); // Refresh data
-        // If profile is open, refresh it too
+        fetchAll(true); // Force refresh
         if (profileModal.student?._id === enrollModal.student._id) {
           fetchProfile(enrollModal.student._id);
         }
@@ -145,11 +173,15 @@ export default function AdminStudents() {
     }
   };
 
-  const filtered = students.filter(s =>
-    s.username.toLowerCase().includes(search.toLowerCase()) ||
-    (s.name && s.name.toLowerCase().includes(search.toLowerCase())) ||
-    s._id.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    return students.filter(s =>
+      s.username.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      (s.name && s.name.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
+      s._id.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+  }, [students, debouncedSearch]);
+
+  if (error) return <ErrorState onRetry={() => fetchAll(true)} message={error} />;
 
   return (
     <div className="space-y-8 pb-24">
@@ -161,12 +193,12 @@ export default function AdminStudents() {
         </div>
         <div className="flex items-center gap-3">
           <div className="px-5 py-2.5 bg-emerald-500/10 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 shadow-sm">
-            {students.filter(s => s.role === 'student').length} Active Students
+            {loading ? <Skeleton className="h-4 w-20" /> : `${students.filter(s => s.role === 'student').length} Active Students`}
           </div>
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar (Debounced) */}
       <div className="relative group max-w-2xl">
         <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
           <Search className="w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
@@ -178,6 +210,11 @@ export default function AdminStudents() {
           onChange={e => setSearch(e.target.value)}
           className="w-full pl-16 pr-8 py-5 rounded-[2rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 shadow-sm outline-none ring-4 ring-transparent focus:ring-emerald-500/10 transition-all font-bold text-slate-700 dark:text-white"
         />
+        {search !== debouncedSearch && (
+          <div className="absolute right-6 top-1/2 -translate-y-1/2">
+            <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -195,7 +232,15 @@ export default function AdminStudents() {
             </thead>
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {loading ? (
-                <tr><td colSpan={6} className="px-10 py-20 text-center"><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
+                Array(5).fill(0).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-10 py-6"><div className="flex items-center gap-4"><Skeleton className="w-12 h-12 rounded-2xl" /><div className="space-y-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-20" /></div></div></td>
+                    <td className="px-10 py-6"><Skeleton className="h-8 w-32 rounded-xl" /></td>
+                    <td className="px-10 py-6"><Skeleton className="h-6 w-20 rounded-full" /></td>
+                    <td className="px-10 py-6"><div className="flex gap-2"><Skeleton className="h-6 w-16" /><Skeleton className="h-6 w-16" /></div></td>
+                    <td className="px-10 py-6 text-right"><Skeleton className="h-10 w-10 rounded-xl ml-auto" /></td>
+                  </tr>
+                ))
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={6} className="px-10 py-20 text-center text-slate-400 font-bold">No students matched your search criteria.</td></tr>
               ) : filtered.map(student => (
@@ -263,7 +308,7 @@ export default function AdminStudents() {
         </div>
       </div>
 
-      {/* Student Profile Modal */}
+      {/* Profile Modal */}
       {profileModal.open && (
         <div className="fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-xl flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300">
           <div className="bg-white dark:bg-slate-900 rounded-[3rem] w-full max-w-5xl h-full max-h-[90vh] overflow-hidden flex flex-col relative shadow-2xl border border-black/10 dark:border-white/5">
@@ -285,15 +330,19 @@ export default function AdminStudents() {
 
             <div className="flex-1 overflow-y-auto p-8 md:p-12">
               {profileLoading ? (
-                <div className="flex flex-col items-center justify-center h-full space-y-4">
-                  <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400">Loading comprehensive records...</p>
+                <div className="space-y-12">
+                  <div className="grid lg:grid-cols-3 gap-12">
+                    <Skeleton className="h-64 rounded-[2.5rem]" />
+                    <div className="lg:col-span-2 space-y-6">
+                      <Skeleton className="h-40 rounded-[2.5rem]" />
+                      <Skeleton className="h-40 rounded-[2.5rem]" />
+                    </div>
+                  </div>
                 </div>
               ) : profileModal.student ? (
                 <div className="grid lg:grid-cols-3 gap-12">
-                  {/* Left Column: Personal Info */}
+                  {/* Personal Info */}
                   <div className="space-y-10">
-                    {/* Identity Card */}
                     <div className="p-8 rounded-[2.5rem] bg-slate-900 text-white dark:bg-slate-950 border border-white/5 text-center relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
                         <ShieldAlert className="w-24 h-24" />
@@ -314,16 +363,15 @@ export default function AdminStudents() {
                       </div>
                     </div>
 
-                    {/* Contact Records */}
                     <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-800/50 border border-black/5 dark:border-white/5 space-y-6">
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 border-b border-black/5 pb-4">Communication & Social</h4>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 border-b border-black/5 pb-4">Communication</h4>
                       <div className="space-y-4">
                         <div className="flex items-center gap-4 group/item">
                           <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover/item:bg-emerald-500/10 group-hover/item:text-emerald-500 transition-all">
                             <Phone className="w-4 h-4" />
                           </div>
                           <div>
-                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">Phone Number</div>
+                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">Phone</div>
                             <div className="text-sm font-bold text-slate-700 dark:text-slate-200">{profileModal.student.phone || 'Not Provided'}</div>
                           </div>
                         </div>
@@ -332,7 +380,7 @@ export default function AdminStudents() {
                             <FaLinkedin className="w-4 h-4" />
                           </div>
                           <div className="flex-grow">
-                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">LinkedIn Profile</div>
+                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">LinkedIn</div>
                             <div className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate max-w-[150px]">
                               {profileModal.student.linkedin ? <a href={profileModal.student.linkedin} target="_blank" className="hover:underline">{profileModal.student.linkedin.split('/').pop()}</a> : 'No Link'}
                             </div>
@@ -343,7 +391,7 @@ export default function AdminStudents() {
                             <FaGithub className="w-4 h-4" />
                           </div>
                           <div className="flex-grow">
-                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">GitHub Records</div>
+                            <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">GitHub</div>
                             <div className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate max-w-[150px]">
                               {profileModal.student.github ? <a href={profileModal.student.github} target="_blank" className="hover:underline">{profileModal.student.github.split('/').pop()}</a> : 'No Link'}
                             </div>
@@ -353,9 +401,8 @@ export default function AdminStudents() {
                     </div>
                   </div>
 
-                  {/* Right Column: Academic & Financials */}
+                  {/* Academic & Financials */}
                   <div className="lg:col-span-2 space-y-10">
-                    {/* Course Enrollments */}
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
@@ -407,7 +454,6 @@ export default function AdminStudents() {
                       )}
                     </div>
 
-                    {/* Financial Ledger Placeholder */}
                     <div className="space-y-6">
                       <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                         <CreditCard className="w-6 h-6 text-purple-500" /> Payment Records
@@ -435,9 +481,6 @@ export default function AdminStudents() {
                                 </td>
                               </tr>
                             ))}
-                            {(!profileModal.student.enrolledBatches || profileModal.student.enrolledBatches.length === 0) && (
-                              <tr><td colSpan={4} className="px-6 py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest italic opacity-40">No transactions recorded</td></tr>
-                            )}
                           </tbody>
                         </table>
                       </div>
@@ -447,7 +490,6 @@ export default function AdminStudents() {
               ) : null}
             </div>
 
-            {/* Modal Footer / Quick Actions */}
             <div className="p-8 border-t border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/20 flex items-center justify-end gap-4 shrink-0">
                <button 
                 onClick={() => setProfileModal({ open: false, student: null })}

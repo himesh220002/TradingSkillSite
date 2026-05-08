@@ -2,12 +2,14 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { validate } from '../middleware/validate.js';
+import { registerSchema, loginSchema } from '../schemas/authSchemas.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'trading_skill_secret_key_2026';
 
 // Register User
-router.post('/register', async (req, res) => {
+router.post('/register', validate(registerSchema), async (req, res) => {
   try {
     const { username, password } = req.body;
     
@@ -24,7 +26,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login User
-router.post('/login', async (req, res) => {
+router.post('/login', validate(loginSchema), async (req, res) => {
   try {
     const { username, password } = req.body;
     
