@@ -9,11 +9,25 @@ import {
   TrendingUp, Users, Calendar, ChevronRight, ChevronDown, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import TradingChart from '@/components/TradingChart';
 
 type Resource = { title: string; url: string; type: string };
 type FAQ = { question: string; answer: string };
+type ContentBlock = {
+  type: 'heading' | 'subheading' | 'paragraph' | 'image' | 'graph' | 'algorithm' | 'question' | 'note' | 'list';
+  content: string;
+  metadata?: {
+    url?: string;
+    language?: string;
+    graphType?: string;
+    options?: string[];
+    correctAnswer?: string;
+    caption?: string;
+  };
+};
+
 type Lesson = {
-  title: string; duration: string; notes: string; videoUrl: string;
+  title: string; duration: string; notes: string; contentBlocks?: ContentBlock[]; videoUrl: string;
   liveClassUrl: string; methods: string; practiceQuestions: string[];
   resources: Resource[]; faqs: FAQ[];
 };
@@ -283,16 +297,101 @@ export default function ClassroomPage() {
               <div className="flex-1 overflow-y-auto p-8">
 
                 {activeTab === 'notes' && (
-                  <div className="max-w-3xl space-y-4">
-                    <h3 className="text-lg font-black text-white">Lesson Notes</h3>
-                    {lesson.notes ? (
-                      <div className="prose prose-invert max-w-none">
-                        <div className="bg-slate-900 rounded-[1.5rem] p-8 border border-white/5 text-slate-300 leading-relaxed whitespace-pre-wrap text-sm">
-                          {lesson.notes}
-                        </div>
+                  <div className="max-w-4xl space-y-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-black text-white flex items-center gap-3">
+                        <FileText className="w-6 h-6 text-emerald-500" />
+                        Comprehensive Study Guide
+                      </h3>
+                    </div>
+                    
+                    {lesson.contentBlocks && lesson.contentBlocks.length > 0 ? (
+                      <div className="space-y-10 pb-20">
+                        {lesson.contentBlocks.map((block, idx) => (
+                          <div key={idx} className="animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${idx * 100}ms` }}>
+                            {block.type === 'heading' && (
+                              <h2 className="text-3xl font-black text-white border-b border-white/5 pb-4 mb-6">{block.content}</h2>
+                            )}
+
+                            {block.type === 'subheading' && (
+                              <h3 className="text-xl font-bold text-emerald-400 mt-8 mb-4">{block.content}</h3>
+                            )}
+
+                            {block.type === 'paragraph' && (
+                              <p className="text-base text-slate-300 leading-relaxed font-medium">{block.content}</p>
+                            )}
+
+                            {block.type === 'image' && (
+                              <div className="space-y-3 group">
+                                <div className="rounded-[2rem] overflow-hidden border border-white/5 bg-slate-900 shadow-2xl transition-transform duration-500 group-hover:scale-[1.01]">
+                                  <img src={block.metadata?.url} alt={block.metadata?.caption || 'Lesson visual'} className="w-full h-auto object-cover" />
+                                </div>
+                                {block.metadata?.caption && (
+                                  <p className="text-[10px] text-center font-black uppercase tracking-widest text-slate-500">{block.metadata.caption}</p>
+                                )}
+                              </div>
+                            )}
+
+                            {block.type === 'list' && (
+                              <ul className="space-y-3">
+                                {(block.metadata?.options || []).map((item, i) => (
+                                  <li key={i} className="flex gap-4 group">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2.5 shrink-0 group-hover:scale-150 transition-transform" />
+                                    <span className="text-slate-300 text-sm leading-relaxed">{item}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+
+                            {block.type === 'algorithm' && (
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between px-6 py-3 bg-slate-800 rounded-t-2xl border-x border-t border-white/5">
+                                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">{block.metadata?.language || 'logic'}</span>
+                                  <div className="flex gap-1.5">
+                                    <div className="w-2 h-2 rounded-full bg-red-500/50" />
+                                    <div className="w-2 h-2 rounded-full bg-amber-500/50" />
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500/50" />
+                                  </div>
+                                </div>
+                                <div className="bg-slate-900 p-8 rounded-b-2xl border border-white/5 font-mono text-sm text-emerald-400 leading-relaxed shadow-inner overflow-x-auto whitespace-pre">
+                                  {block.content}
+                                </div>
+                              </div>
+                            )}
+
+                            {block.type === 'graph' && (
+                              <div className="animate-in zoom-in-95 duration-700">
+                                <TradingChart 
+                                  type={block.metadata?.graphType || 'PAYOFF'} 
+                                  caption={block.metadata?.caption} 
+                                />
+                              </div>
+                            )}
+
+                            {block.type === 'note' && (
+                              <div className="relative p-8 rounded-[2rem] bg-emerald-500/5 border border-emerald-500/10 overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500" />
+                                <div className="flex gap-4">
+                                  <Lightbulb className="w-6 h-6 text-emerald-500 shrink-0 mt-1" />
+                                  <p className="text-sm italic text-emerald-100/80 leading-relaxed">{block.content}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <EmptyState icon={FileText} label="No notes added yet for this lesson." />
+                      <>
+                        {lesson.notes ? (
+                          <div className="prose prose-invert max-w-none">
+                            <div className="bg-slate-900 rounded-[1.5rem] p-8 border border-white/5 text-slate-300 leading-relaxed whitespace-pre-wrap text-sm">
+                              {lesson.notes}
+                            </div>
+                          </div>
+                        ) : (
+                          <EmptyState icon={FileText} label="No study guide content available." />
+                        )}
+                      </>
                     )}
                   </div>
                 )}

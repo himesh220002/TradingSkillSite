@@ -27,10 +27,24 @@ import { cn } from "@/lib/utils";
 
 type Resource = { title: string; url: string; type: string };
 type LessonFAQ = { question: string; answer: string };
+type ContentBlock = {
+  type: 'heading' | 'subheading' | 'paragraph' | 'image' | 'graph' | 'algorithm' | 'question' | 'note' | 'list';
+  content: string;
+  metadata?: {
+    url?: string;
+    language?: string;
+    graphType?: string;
+    options?: string[];
+    correctAnswer?: string;
+    caption?: string;
+  };
+};
+
 type Lesson = {
   title: string;
   duration: string;
   notes: string;
+  contentBlocks?: ContentBlock[];
   videoUrl: string;
   liveClassUrl: string;
   methods: string;
@@ -74,6 +88,7 @@ export default function EditCourse() {
       title: '',
       duration: '',
       notes: '',
+      contentBlocks: [],
       videoUrl: '',
       liveClassUrl: '',
       methods: '',
@@ -155,9 +170,39 @@ export default function EditCourse() {
   };
 
   const updateLesson = (sIdx: number, lIdx: number, field: keyof Lesson, val: any) => {
-    const c = [...curriculum];
-    (c[sIdx].lessons[lIdx] as any)[field] = val;
-    setCurriculum(c);
+    setCurriculum(prev => {
+      const next = [...prev];
+      const section = { ...next[sIdx] };
+      const lessons = [...section.lessons];
+      lessons[lIdx] = { ...lessons[lIdx], [field]: val };
+      section.lessons = lessons;
+      next[sIdx] = section;
+      return next;
+    });
+  };
+
+  const [savingLesson, setSavingLesson] = useState(false);
+
+  const saveLessonProgress = async () => {
+    if (!contentModal) return;
+    setSavingLesson(true);
+    try {
+      const lesson = curriculum[contentModal.sIdx].lessons[contentModal.lIdx];
+      const res = await fetch(`http://localhost:5000/api/courses/${id}/lessons/${contentModal.sIdx}/${contentModal.lIdx}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lesson),
+      });
+      if (res.ok) {
+        // Optional: show a toast or temporary success state
+      } else {
+        alert('Error saving lesson progress');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingLesson(false);
+    }
   };
 
   // ── Content Modal Helpers ───────────────────────────────────────────────────
@@ -167,6 +212,29 @@ export default function EditCourse() {
   const updateSelectedLessonContent = (field: keyof Lesson, val: any) => {
     if (!contentModal) return;
     updateLesson(contentModal.sIdx, contentModal.lIdx, field, val);
+  };
+
+  const addContentBlock = (type: ContentBlock['type']) => {
+    if (!contentModal) return;
+    const lesson = curriculum[contentModal.sIdx].lessons[contentModal.lIdx];
+    const blocks = lesson.contentBlocks || [];
+    const newBlock: ContentBlock = { type, content: '', metadata: {} };
+    updateSelectedLessonContent('contentBlocks', [...blocks, newBlock]);
+  };
+
+  const updateContentBlock = (bIdx: number, updates: Partial<ContentBlock>) => {
+    if (!contentModal) return;
+    const lesson = curriculum[contentModal.sIdx].lessons[contentModal.lIdx];
+    const blocks = [...(lesson.contentBlocks || [])];
+    blocks[bIdx] = { ...blocks[bIdx], ...updates };
+    updateSelectedLessonContent('contentBlocks', blocks);
+  };
+
+  const removeContentBlock = (bIdx: number) => {
+    if (!contentModal) return;
+    const lesson = curriculum[contentModal.sIdx].lessons[contentModal.lIdx];
+    const blocks = (lesson.contentBlocks || []).filter((_, i) => i !== bIdx);
+    updateSelectedLessonContent('contentBlocks', blocks);
   };
 
   // ── FAQ helpers ─────────────────────────────────────────────────────────────
@@ -507,232 +575,429 @@ export default function EditCourse() {
 
             {/* Modal Body */}
             <div className="flex-1 overflow-y-auto p-10 space-y-10">
-              {/* Notes & Methods */}
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <FileText className="w-4 h-4" /> Lesson Notes
-                  </label>
-                  <textarea
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].notes}
-                    onChange={e => updateSelectedLessonContent('notes', e.target.value)}
-                    rows={8}
-                    placeholder="Main teaching points, code snippets, etc."
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all resize-none text-sm leading-relaxed"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4" /> Methods / Strategies
-                  </label>
-                  <textarea
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].methods}
-                    onChange={e => updateSelectedLessonContent('methods', e.target.value)}
-                    rows={8}
-                    placeholder="Specific trading setups or logic..."
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all resize-none text-sm leading-relaxed"
-                  />
-                </div>
-              </div>
-
-              {/* Videos & Links */}
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Video className="w-4 h-4" /> Video URL (YouTube/Vimeo)
-                  </label>
-                  <input
-                    type="url"
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].videoUrl}
-                    onChange={e => updateSelectedLessonContent('videoUrl', e.target.value)}
-                    placeholder="https://youtube.com/watch?v=..."
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <PlayCircle className="w-4 h-4" /> Live Class URL
-                  </label>
-                  <input
-                    type="url"
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].liveClassUrl}
-                    onChange={e => updateSelectedLessonContent('liveClassUrl', e.target.value)}
-                    placeholder="Zoom / Google Meet link"
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
-                  />
-                </div>
-              </div>
-
-              {/* Practice Questions */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" /> Practice Questions
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions || [];
-                      updateSelectedLessonContent('practiceQuestions', [...cur, '']);
-                    }}
-                    className="text-[10px] font-black uppercase text-emerald-500 hover:underline"
-                  >
-                    + Add Question
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions || []).map((q, qIdx) => (
-                    <div key={qIdx} className="flex gap-3">
-                      <input
-                        type="text"
-                        value={q}
-                        onChange={e => {
-                          const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions || [])];
-                          cur[qIdx] = e.target.value;
-                          updateSelectedLessonContent('practiceQuestions', cur);
-                        }}
-                        placeholder={`Question ${qIdx + 1}`}
-                        className="flex-grow px-6 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none text-sm focus:ring-2 focus:ring-emerald-500/10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions.filter((_, i) => i !== qIdx);
-                          updateSelectedLessonContent('practiceQuestions', cur);
-                        }}
-                        className="text-slate-300 hover:text-red-500 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+              {contentModal && (
+                <>
+                  {/* Dynamic Content Blocks Architecture */}
+                  <div className="space-y-8">
+                    <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-4">
+                      <h4 className="text-sm font-black uppercase tracking-[0.2em] text-emerald-500 flex items-center gap-2">
+                        <Layout className="w-5 h-5" /> Sequential Topic Builder
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { t: 'heading', l: '+ Heading', i: FileText },
+                          { t: 'subheading', l: '+ Subheading', i: FileText },
+                          { t: 'paragraph', l: '+ Text', i: FileText },
+                          { t: 'list', l: '+ List', i: Layout },
+                          { t: 'image', l: '+ Image', i: Video },
+                          { t: 'graph', l: '+ Graph', i: TrendingUp },
+                          { t: 'algorithm', l: '+ Algo', i: Lightbulb },
+                          { t: 'note', l: '+ Note', i: HelpCircle }
+                        ].map(btn => (
+                          <button
+                            key={btn.t}
+                            type="button"
+                            onClick={() => addContentBlock(btn.t as any)}
+                            className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all border border-black/5 dark:border-white/5"
+                          >
+                            {btn.l}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Resources */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4" /> Downloadable Resources / Links
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || [];
-                      updateSelectedLessonContent('resources', [...cur, { title: '', url: '', type: 'link' }]);
-                    }}
-                    className="text-[10px] font-black uppercase text-emerald-500 hover:underline"
-                  >
-                    + Add Resource
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || []).map((res, rIdx) => (
-                    <div key={rIdx} className="grid grid-cols-12 gap-3">
-                      <input
-                        type="text"
-                        value={res.title}
-                        onChange={e => {
-                          const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || [])];
-                          cur[rIdx].title = e.target.value;
-                          updateSelectedLessonContent('resources', cur);
-                        }}
-                        placeholder="Resource Title"
-                        className="col-span-5 px-6 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none text-sm focus:ring-2 focus:ring-emerald-500/10"
-                      />
+                    <div className="space-y-6">
+                      {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].contentBlocks || []).map((block, bIdx) => (
+                        <div key={bIdx} className="group relative p-6 rounded-[2rem] bg-slate-50/50 dark:bg-slate-800/30 border border-black/5 dark:border-white/5 animate-in slide-in-from-bottom-4 duration-500">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full">
+                              {block.type} Block
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeContentBlock(bIdx)}
+                              className="p-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {block.type === 'heading' && (
+                            <input
+                              type="text"
+                              value={block.content || ''}
+                              onChange={e => updateContentBlock(bIdx, { content: e.target.value })}
+                              placeholder="Topic Heading..."
+                              className="w-full bg-transparent border-none outline-none font-black text-2xl text-slate-900 dark:text-white"
+                            />
+                          )}
+
+                          {block.type === 'subheading' && (
+                            <input
+                              type="text"
+                              value={block.content || ''}
+                              onChange={e => updateContentBlock(bIdx, { content: e.target.value })}
+                              placeholder="Subheading..."
+                              className="w-full bg-transparent border-none outline-none font-bold text-lg text-slate-800 dark:text-slate-200"
+                            />
+                          )}
+
+                          {block.type === 'paragraph' && (
+                            <textarea
+                              value={block.content || ''}
+                              onChange={e => updateContentBlock(bIdx, { content: e.target.value })}
+                              placeholder="Detailed explanation goes here..."
+                              rows={4}
+                              className="w-full bg-transparent border-none outline-none text-sm text-slate-500 dark:text-slate-400 leading-relaxed resize-none"
+                            />
+                          )}
+
+                          {block.type === 'image' && (
+                            <div className="space-y-3">
+                              <input
+                                type="text"
+                                value={block.metadata?.url || ''}
+                                onChange={e => updateContentBlock(bIdx, { metadata: { ...block.metadata, url: e.target.value } })}
+                                placeholder="Image URL (Unsplash/Imgur)..."
+                                className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-xs border border-black/5 dark:border-white/5"
+                              />
+                              <input
+                                type="text"
+                                value={block.metadata?.caption || ''}
+                                onChange={e => updateContentBlock(bIdx, { metadata: { ...block.metadata, caption: e.target.value } })}
+                                placeholder="Image Caption..."
+                                className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-[10px] opacity-60 border border-black/5 dark:border-white/5"
+                              />
+                            </div>
+                          )}
+
+                          {block.type === 'graph' && (
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <select
+                                value={block.metadata?.graphType || ''}
+                                onChange={e => updateContentBlock(bIdx, { metadata: { ...block.metadata, graphType: e.target.value } })}
+                                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-xs border border-black/5 dark:border-white/5 outline-none font-bold"
+                              >
+                                <option value="">Select Graph Type</option>
+                                <option value="PAYOFF">Payoff Diagram</option>
+                                <option value="DELTA">Delta S-Curve</option>
+                                <option value="GAMMA">Gamma Curve</option>
+                                <option value="THETA">Theta Decay</option>
+                                <option value="IV_SURFACE">Volatility Surface</option>
+                              </select>
+                              <input
+                                type="text"
+                                value={block.metadata?.caption || ''}
+                                onChange={e => updateContentBlock(bIdx, { metadata: { ...block.metadata, caption: e.target.value } })}
+                                placeholder="Graph Description..."
+                                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-xs border border-black/5 dark:border-white/5"
+                              />
+                            </div>
+                          )}
+
+                          {block.type === 'algorithm' && (
+                            <div className="space-y-3">
+                              <select
+                                value={block.metadata?.language || 'python'}
+                                onChange={e => updateContentBlock(bIdx, { metadata: { ...block.metadata, language: e.target.value } })}
+                                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-[10px] font-black uppercase tracking-widest border border-black/5 dark:border-white/5"
+                              >
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="pine">Pine Script</option>
+                              </select>
+                              <textarea
+                                value={block.content || ''}
+                                onChange={e => updateContentBlock(bIdx, { content: e.target.value })}
+                                placeholder="Code snippet or algorithmic logic..."
+                                rows={6}
+                                className="w-full px-5 py-4 rounded-2xl bg-slate-900 text-emerald-400 font-mono text-xs border border-white/5 outline-none"
+                              />
+                            </div>
+                          )}
+
+                          {block.type === 'note' && (
+                            <div className="flex gap-4">
+                              <div className="w-1.5 h-12 rounded-full bg-emerald-500 shrink-0" />
+                              <textarea
+                                value={block.content || ''}
+                                onChange={e => updateContentBlock(bIdx, { content: e.target.value })}
+                                placeholder="Professional tip or important warning..."
+                                className="w-full bg-transparent border-none outline-none italic text-sm text-emerald-600 dark:text-emerald-400 font-medium leading-relaxed resize-none"
+                              />
+                            </div>
+                          )}
+
+                          {block.type === 'list' && (
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">List Items</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const options = block.metadata?.options || [];
+                                    updateContentBlock(bIdx, { metadata: { ...block.metadata, options: [...options, ''] } });
+                                  }}
+                                  className="text-[10px] font-black uppercase text-emerald-500 hover:underline"
+                                >
+                                  + Add Item
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                {(block.metadata?.options || []).map((item, iIdx) => (
+                                  <div key={iIdx} className="flex gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-3 shrink-0" />
+                                    <input
+                                      type="text"
+                                      value={item || ''}
+                                      onChange={e => {
+                                        const options = [...(block.metadata?.options || [])];
+                                        options[iIdx] = e.target.value;
+                                        updateContentBlock(bIdx, { metadata: { ...block.metadata, options } });
+                                      }}
+                                      placeholder={`Item ${iIdx + 1}`}
+                                      className="w-full bg-transparent border-none outline-none text-sm text-slate-600 dark:text-slate-400"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const options = (block.metadata?.options || []).filter((_, i) => i !== iIdx);
+                                        updateContentBlock(bIdx, { metadata: { ...block.metadata, options } });
+                                      }}
+                                      className="p-1 text-slate-300 hover:text-red-500"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      
+                      {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].contentBlocks || []).length === 0 && (
+                        <div className="py-20 rounded-[3rem] border-2 border-dashed border-black/5 dark:border-white/5 flex flex-col items-center justify-center text-center opacity-30">
+                          <Layout className="w-12 h-12 mb-4" />
+                          <p className="font-bold">No sequential blocks added yet.</p>
+                          <p className="text-xs">Use the buttons above to build your topic elementally.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Videos & Links */}
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <Video className="w-4 h-4" /> Video URL (YouTube/Vimeo)
+                      </label>
                       <input
                         type="url"
-                        value={res.url}
-                        onChange={e => {
-                          const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || [])];
-                          cur[rIdx].url = e.target.value;
-                          updateSelectedLessonContent('resources', cur);
-                        }}
-                        placeholder="URL"
-                        className="col-span-6 px-6 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none text-sm focus:ring-2 focus:ring-emerald-500/10"
+                        value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].videoUrl}
+                        onChange={e => updateSelectedLessonContent('videoUrl', e.target.value)}
+                        placeholder="https://youtube.com/watch?v=..."
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
                       />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources.filter((_, i) => i !== rIdx);
-                          updateSelectedLessonContent('resources', cur);
-                        }}
-                        className="col-span-1 flex items-center justify-center text-slate-300 hover:text-red-500 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Lesson FAQs */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4" /> Lesson Specific Q&A
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || [];
-                      updateSelectedLessonContent('faqs', [...cur, { question: '', answer: '' }]);
-                    }}
-                    className="text-[10px] font-black uppercase text-emerald-500 hover:underline"
-                  >
-                    + Add Q&A
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || []).map((faq, fIdx) => (
-                    <div key={fIdx} className="p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl space-y-3 relative">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs.filter((_, i) => i !== fIdx);
-                          updateSelectedLessonContent('faqs', cur);
-                        }}
-                        className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                    <div className="space-y-3">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <PlayCircle className="w-4 h-4" /> Live Class URL
+                      </label>
                       <input
-                        type="text"
-                        value={faq.question}
-                        onChange={e => {
-                          const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || [])];
-                          cur[fIdx].question = e.target.value;
-                          updateSelectedLessonContent('faqs', cur);
-                        }}
-                        placeholder="Question"
-                        className="w-full px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm font-bold focus:ring-2 focus:ring-emerald-500/10"
-                      />
-                      <textarea
-                        value={faq.answer}
-                        onChange={e => {
-                          const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || [])];
-                          cur[fIdx].answer = e.target.value;
-                          updateSelectedLessonContent('faqs', cur);
-                        }}
-                        placeholder="Answer"
-                        rows={2}
-                        className="w-full px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm resize-none focus:ring-2 focus:ring-emerald-500/10"
+                        type="url"
+                        value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].liveClassUrl}
+                        onChange={e => updateSelectedLessonContent('liveClassUrl', e.target.value)}
+                        placeholder="Zoom / Google Meet link"
+                        className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
                       />
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+
+                  {/* Practice Questions */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4" /> Practice Questions
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions || [];
+                          updateSelectedLessonContent('practiceQuestions', [...cur, '']);
+                        }}
+                        className="text-[10px] font-black uppercase text-emerald-500 hover:underline"
+                      >
+                        + Add Question
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions || []).map((q, qIdx) => (
+                        <div key={qIdx} className="flex gap-3">
+                          <input
+                            type="text"
+                            value={q}
+                            onChange={e => {
+                              const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions || [])];
+                              cur[qIdx] = e.target.value;
+                              updateSelectedLessonContent('practiceQuestions', cur);
+                            }}
+                            placeholder={`Question ${qIdx + 1}`}
+                            className="flex-grow px-6 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none text-sm focus:ring-2 focus:ring-emerald-500/10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].practiceQuestions.filter((_, i) => i !== qIdx);
+                              updateSelectedLessonContent('practiceQuestions', cur);
+                            }}
+                            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Resources */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <LinkIcon className="w-4 h-4" /> Learning Resources
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || [];
+                          updateSelectedLessonContent('resources', [...cur, { title: '', url: '', type: 'link' }]);
+                        }}
+                        className="text-[10px] font-black uppercase text-emerald-500 hover:underline"
+                      >
+                        + Add Resource
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || []).map((res, rIdx) => (
+                        <div key={rIdx} className="grid grid-cols-12 gap-3">
+                          <input
+                            type="text"
+                            value={res.title}
+                            onChange={e => {
+                              const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || [])];
+                              cur[rIdx].title = e.target.value;
+                              updateSelectedLessonContent('resources', cur);
+                            }}
+                            placeholder="Resource Title"
+                            className="col-span-5 px-6 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none text-sm focus:ring-2 focus:ring-emerald-500/10"
+                          />
+                          <input
+                            type="url"
+                            value={res.url}
+                            onChange={e => {
+                              const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources || [])];
+                              cur[rIdx].url = e.target.value;
+                              updateSelectedLessonContent('resources', cur);
+                            }}
+                            placeholder="URL"
+                            className="col-span-6 px-6 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none text-sm focus:ring-2 focus:ring-emerald-500/10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].resources.filter((_, i) => i !== rIdx);
+                              updateSelectedLessonContent('resources', cur);
+                            }}
+                            className="col-span-1 flex items-center justify-center text-slate-300 hover:text-red-500 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Lesson FAQs */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4" /> Lesson Specific Q&A
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || [];
+                          updateSelectedLessonContent('faqs', [...cur, { question: '', answer: '' }]);
+                        }}
+                        className="text-[10px] font-black uppercase text-emerald-500 hover:underline"
+                      >
+                        + Add Q&A
+                      </button>
+                    </div>
+                    <div className="space-y-4">
+                      {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || []).map((faq, fIdx) => (
+                        <div key={fIdx} className="p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl space-y-3 relative">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cur = curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs.filter((_, i) => i !== fIdx);
+                              updateSelectedLessonContent('faqs', cur);
+                            }}
+                            className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="text"
+                            value={faq.question}
+                            onChange={e => {
+                              const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || [])];
+                              cur[fIdx].question = e.target.value;
+                              updateSelectedLessonContent('faqs', cur);
+                            }}
+                            placeholder="Question"
+                            className="w-full px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm font-bold focus:ring-2 focus:ring-emerald-500/10"
+                          />
+                          <textarea
+                            value={faq.answer}
+                            onChange={e => {
+                              const cur = [...(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].faqs || [])];
+                              cur[fIdx].answer = e.target.value;
+                              updateSelectedLessonContent('faqs', cur);
+                            }}
+                            placeholder="Answer"
+                            rows={2}
+                            className="w-full px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm resize-none focus:ring-2 focus:ring-emerald-500/10"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Modal Footer */}
             <div className="px-10 py-6 border-t border-black/5 dark:border-white/5 flex items-center justify-end bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
-              <button
-                type="button"
-                onClick={closeContentModal}
-                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all"
-              >
-                Done Editing Content
-              </button>
+                <button
+                  type="button"
+                  onClick={saveLessonProgress}
+                  disabled={savingLesson}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all flex items-center gap-2"
+                >
+                  {savingLesson ? (
+                    <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Saving...</>
+                  ) : (
+                    <><Save className="w-4 h-4" /> Save Lesson Progress</>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeContentModal}
+                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all"
+                >
+                  Done Editing Content
+                </button>
             </div>
           </div>
         </div>

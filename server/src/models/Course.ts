@@ -1,9 +1,23 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IContentBlock {
+  type: 'heading' | 'subheading' | 'paragraph' | 'image' | 'graph' | 'algorithm' | 'question' | 'note' | 'list';
+  content: string;
+  metadata?: {
+    url?: string;
+    language?: string;
+    graphType?: string;
+    options?: string[]; // For questions
+    correctAnswer?: string;
+    caption?: string;
+  };
+}
+
 export interface ILesson {
   title: string;
   duration: string;
   notes: string;
+  contentBlocks: IContentBlock[];
   videoUrl: string;
   liveClassUrl: string;
   methods: string;
@@ -68,6 +82,18 @@ const CourseSchema: Schema = new Schema({
       title: { type: String, required: true },
       duration: { type: String },
       notes: { type: String, default: '' },
+      contentBlocks: [{
+        type: { type: String, enum: ['heading', 'subheading', 'paragraph', 'image', 'graph', 'algorithm', 'question', 'note', 'list'] },
+        content: { type: String },
+        metadata: {
+          url: { type: String },
+          language: { type: String },
+          graphType: { type: String },
+          options: [{ type: String }],
+          correctAnswer: { type: String },
+          caption: { type: String }
+        }
+      }],
       videoUrl: { type: String, default: '' },
       liveClassUrl: { type: String, default: '' },
       methods: { type: String, default: '' },

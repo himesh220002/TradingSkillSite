@@ -68,9 +68,10 @@ router.patch('/:courseId/lessons/:sectionIndex/:lessonIndex', async (req, res) =
     if (!course.curriculum[sIdx]) return res.status(404).json({ message: 'Section not found' });
     if (!course.curriculum[sIdx].lessons[lIdx]) return res.status(404).json({ message: 'Lesson not found' });
 
-    const { notes, videoUrl, liveClassUrl, methods, practiceQuestions, resources, faqs } = req.body;
+    const { notes, contentBlocks, videoUrl, liveClassUrl, methods, practiceQuestions, resources, faqs } = req.body;
     const lesson = course.curriculum[sIdx].lessons[lIdx] as any;
     if (notes !== undefined) lesson.notes = notes;
+    if (contentBlocks !== undefined) lesson.contentBlocks = contentBlocks;
     if (videoUrl !== undefined) lesson.videoUrl = videoUrl;
     if (liveClassUrl !== undefined) lesson.liveClassUrl = liveClassUrl;
     if (methods !== undefined) lesson.methods = methods;
