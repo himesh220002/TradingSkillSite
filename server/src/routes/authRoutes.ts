@@ -55,7 +55,10 @@ router.get('/profile/:id', async (req, res) => {
     const user = await User.findById(req.params.id)
       .populate({
         path: 'enrolledBatches',
-        populate: { path: 'courseId' }
+        populate: {
+          path: 'courseId',
+          select: '_id title subtitle duration level bannerImage instructor curriculum faqs'
+        }
       });
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
@@ -79,4 +82,16 @@ router.put('/profile/:id', async (req, res) => {
   }
 });
 
+// List all users (admin use)
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({}, '_id username role enrolledBatches createdAt')
+      .populate('enrolledBatches', '_id batchName courseId');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users', error });
+  }
+});
+
 export default router;
+

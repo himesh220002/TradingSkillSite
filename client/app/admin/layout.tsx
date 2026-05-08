@@ -12,7 +12,7 @@ import {
   LogOut,
   Bell,
   Search,
-  ShieldAlert
+  GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,7 @@ const ADMIN_MENU = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Courses', href: '/admin/courses', icon: BookOpen },
   { name: 'Batches', href: '/admin/batches', icon: Users },
-  { name: 'Students', href: '/admin/students', icon: ShieldAlert },
+  { name: 'Students', href: '/admin/students', icon: GraduationCap },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

@@ -2,15 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { 
-  Plus, 
-  Search, 
-  MoreVertical, 
-  Edit2, 
-  Trash2, 
-  Eye,
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
   Filter,
-  ArrowRight
+  Copy,
+  Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +26,13 @@ interface Course {
 export default function AdminCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 1500);
+  };
 
   useEffect(() => {
     fetchCourses();
@@ -95,6 +101,7 @@ export default function AdminCourses() {
             <thead>
               <tr className="border-b border-black/5 dark:border-white/5 text-xs font-bold uppercase tracking-wider text-slate-400">
                 <th className="px-8 py-5">Course Name</th>
+                <th className="px-8 py-5">Course ID</th>
                 <th className="px-8 py-5">Level</th>
                 <th className="px-8 py-5">Duration</th>
                 <th className="px-8 py-5">Students</th>
@@ -105,16 +112,26 @@ export default function AdminCourses() {
             <tbody className="divide-y divide-black/5 dark:divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-8 py-10 text-center text-slate-400">Loading courses...</td>
+                  <td colSpan={7} className="px-8 py-10 text-center text-slate-400">Loading courses...</td>
                 </tr>
               ) : courses.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-8 py-10 text-center text-slate-400">No courses found. Add your first course!</td>
+                  <td colSpan={7} className="px-8 py-10 text-center text-slate-400">No courses found. Add your first course!</td>
                 </tr>
               ) : courses.map((course) => (
                 <tr key={course._id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                   <td className="px-8 py-5">
                     <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">{course.title}</div>
+                  </td>
+                  <td className="px-8 py-5">
+                    <button onClick={() => copyId(course._id)} className="flex items-center gap-1.5 group/id">
+                      <code className="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg text-slate-500 group-hover/id:text-emerald-600 transition-colors">
+                        {course._id.slice(0, 8)}…
+                      </code>
+                      {copiedId === course._id
+                        ? <Check className="w-3 h-3 text-emerald-500" />
+                        : <Copy className="w-3 h-3 text-slate-400 opacity-0 group-hover/id:opacity-100 transition-opacity" />}
+                    </button>
                   </td>
                   <td className="px-8 py-5">
                     <span className="px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-full">{course.level}</span>

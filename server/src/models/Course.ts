@@ -3,6 +3,13 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ILesson {
   title: string;
   duration: string;
+  notes: string;
+  videoUrl: string;
+  liveClassUrl: string;
+  methods: string;
+  practiceQuestions: string[];
+  resources: { title: string; url: string; type: string }[];
+  faqs: { question: string; answer: string }[];
 }
 
 export interface ISection {
@@ -36,6 +43,7 @@ export interface ICourse extends Document {
   batchTimings: string;
   enrolledStudents: number;
   topics: { name: string; order: number }[];
+  isArchived: boolean;
   createdAt: Date;
 }
 
@@ -58,7 +66,14 @@ const CourseSchema: Schema = new Schema({
     title: { type: String, required: true },
     lessons: [{
       title: { type: String, required: true },
-      duration: { type: String }
+      duration: { type: String },
+      notes: { type: String, default: '' },
+      videoUrl: { type: String, default: '' },
+      liveClassUrl: { type: String, default: '' },
+      methods: { type: String, default: '' },
+      practiceQuestions: [{ type: String }],
+      resources: [{ title: String, url: String, type: { type: String, default: 'link' } }],
+      faqs: [{ question: String, answer: String }]
     }]
   }],
   faqs: [{
@@ -72,6 +87,7 @@ const CourseSchema: Schema = new Schema({
     name: { type: String, required: true },
     order: { type: Number, required: true }
   }],
+  isArchived: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 

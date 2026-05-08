@@ -1,12 +1,15 @@
 import mongoose, { Schema, Document } from 'mongoose';
+
 import bcrypt from 'bcrypt';
 
 export interface IUser extends Document {
   username: string;
   password: string;
   role: 'student' | 'admin';
+  enrolledBatches: mongoose.Types.ObjectId[];
   createdAt: Date;
 }
+
 
 const UserSchema: Schema = new Schema({
   username: { type: String, required: true, unique: true },

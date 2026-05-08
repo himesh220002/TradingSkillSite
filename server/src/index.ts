@@ -6,6 +6,7 @@ import courseRoutes from './routes/courseRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import batchRoutes from './routes/batchRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import statsRoutes from './routes/statsRoutes.js';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/batches', batchRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

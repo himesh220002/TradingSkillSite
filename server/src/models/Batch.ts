@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IBatchTopic {
   topicId: string;
   name: string;
+  sectionName?: string;
   isCompleted: boolean;
   completionDate?: Date | null;
 }
@@ -11,6 +12,7 @@ export interface IBatch extends Document {
   courseId: mongoose.Types.ObjectId;
   batchName: string; // e.g., "Jan 2026 Batch A"
   studentCount: number;
+  students: mongoose.Types.ObjectId[];
   startDate: Date;
   status: 'Upcoming' | 'Ongoing' | 'Completed' | 'On Hold';
   trainer: string;
@@ -30,6 +32,7 @@ const BatchSchema: Schema = new Schema({
   courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
   batchName: { type: String, required: true },
   studentCount: { type: Number, default: 0 },
+  students: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   startDate: { type: Date, required: true },
   status: {
     type: String,
@@ -44,6 +47,7 @@ const BatchSchema: Schema = new Schema({
   topicProgress: [{
     topicId: { type: String, required: true },
     name: { type: String, required: true },
+    sectionName: { type: String },
     isCompleted: { type: Boolean, default: false },
     completionDate: { type: Date, default: null }
   }],
