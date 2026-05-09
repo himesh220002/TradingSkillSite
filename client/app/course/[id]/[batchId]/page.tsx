@@ -56,6 +56,7 @@ export default function ClassroomPage() {
 
   const [course, setCourse] = useState<Course | null>(null);
   const [batch, setBatch]   = useState<Batch | null>(null);
+  const [studentProgress, setStudentProgress] = useState<{ completedTopics: string[]; progressPercentage: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('notes');
   const [selectedLesson, setSelectedLesson] = useState<{ sIdx: number; lIdx: number } | null>(null);
@@ -69,14 +70,23 @@ export default function ClassroomPage() {
 
   const fetchData = async () => {
     try {
-      const [courseRes, batchRes] = await Promise.all([
+      const token = localStorage.getItem('userToken');
+
+      const [courseRes, batchRes, progressRes] = await Promise.all([
         fetch(`http://localhost:5000/api/courses/${courseId}`),
         fetch(`http://localhost:5000/api/batches/${batchId}`),
+        fetch(`http://localhost:5000/api/student-progress/${batchId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
       ]);
       const courseData = await courseRes.json();
       const batchData  = await batchRes.json();
+      const progressData = await progressRes.json();
+
       setCourse(courseData);
       setBatch(batchData);
+      setStudentProgress(progressData);
+      
       // Auto-select first lesson
       if (courseData.curriculum?.[0]?.lessons?.[0]) {
         setSelectedLesson({ sIdx: 0, lIdx: 0 });
@@ -89,25 +99,38 @@ export default function ClassroomPage() {
   };
 
   const getTopicProgress = (sectionTitle: string, lessonTitle: string) => {
-    if (!batch) return null;
+    if (!batch || !studentProgress) return null;
     // Try matching by sectionName + name (New Format)
     let found = batch.topicProgress.find(t => t.sectionName === sectionTitle && t.name === lessonTitle);
     // Fallback to legacy full string match (Old Format: "Section: Lesson")
     if (!found) {
       found = batch.topicProgress.find(t => t.name === `${sectionTitle}: ${lessonTitle}`);
     }
-    return found ?? null;
+    
+    if (found) {
+      // Use student-specific completion status
+      return {
+        ...found,
+        isCompleted: studentProgress.completedTopics.includes(found.topicId)
+      };
+    }
+    return null;
   };
 
   const toggleTopic = async (topicId: string, current: boolean) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/batches/${batchId}/topic/${topicId}`, {
+      const token = localStorage.getItem('userToken');
+
+      const res = await fetch(`http://localhost:5000/api/student-progress/${batchId}/topic/${topicId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ isCompleted: !current }),
       });
       const updated = await res.json();
-      setBatch(prev => prev ? { ...prev, topicProgress: updated.topicProgress, progressPercentage: updated.progressPercentage } : prev);
+      setStudentProgress(updated);
     } catch (err) { console.error(err); }
   };
 
@@ -130,8 +153,9 @@ export default function ClassroomPage() {
   const section = selectedLesson != null ? activeCourse.curriculum[selectedLesson.sIdx] : null;
   const tp = lesson && section ? getTopicProgress(section.title, lesson.title) : null;
 
-  const completedCount = batch.topicProgress.filter(t => t.isCompleted).length;
+  const completedCount = studentProgress?.completedTopics?.length || 0;
   const totalCount     = batch.topicProgress.length;
+  const displayProgress = studentProgress?.progressPercentage || 0;
 
   return (
     <div className="flex flex-col h-screen bg-slate-950 text-white overflow-hidden">
@@ -149,12 +173,12 @@ export default function ClassroomPage() {
         {/* Progress */}
         <div className="hidden sm:flex items-center gap-3">
           <div className="text-right">
-            <div className="text-xs font-black text-emerald-400">{batch.progressPercentage}%</div>
+            <div className="text-xs font-black text-emerald-400">{displayProgress}%</div>
             <div className="text-[10px] text-slate-500">{completedCount}/{totalCount} topics</div>
           </div>
           <div className="w-28 h-2 bg-slate-800 rounded-full overflow-hidden">
             <div className="h-full bg-emerald-500 rounded-full transition-all duration-700"
-              style={{ width: `${batch.progressPercentage}%` }} />
+              style={{ width: `${displayProgress}%` }} />
           </div>
         </div>
 

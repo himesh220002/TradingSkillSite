@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import StudentProgress from '../models/StudentProgress.js';
 import { validate } from '../middleware/validate.js';
 import { registerSchema, loginSchema } from '../schemas/authSchemas.js';
 
@@ -63,7 +64,27 @@ router.get('/profile/:id', async (req, res) => {
         }
       });
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
+
+    // For each batch, fetch the student's personal progress
+    const enrichedBatches = await Promise.all(user.enrolledBatches.map(async (batch: any) => {
+      const progress = await StudentProgress.findOne({ userId: user._id, batchId: batch._id });
+      
+      let personalProgressPercentage = 0;
+      if (progress && batch.topicProgress && batch.topicProgress.length > 0) {
+        personalProgressPercentage = Math.round((progress.completedTopics.length / batch.topicProgress.length) * 100);
+      }
+
+      return {
+        ...batch.toObject(),
+        progressPercentage: personalProgressPercentage, // Override with personal progress
+        isBatchProgress: batch.progressPercentage // Keep batch progress just in case
+      };
+    }));
+
+    const response = user.toObject();
+    response.enrolledBatches = enrichedBatches;
+
+    res.json(response);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching profile', error });
   }
