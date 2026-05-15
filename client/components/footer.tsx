@@ -28,7 +28,7 @@ export function Footer() {
                 <BarChart3 className="w-6 h-6 text-white dark:text-slate-950" />
               </div>
               <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Trading<span className="text-emerald-500">Skill</span>
+                TradingX<span className="text-emerald-500">Skill</span>
               </span>
             </Link>
             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-xs">
@@ -63,9 +63,15 @@ export function Footer() {
           <div>
             <h4 className="text-slate-900 dark:text-white font-bold mb-6">Company</h4>
             <ul className="space-y-4">
-              {['About Us', 'Community', 'Expert Mentors', 'Success Stories', 'Contact Support'].map((item) => (
-                <li key={item}>
-                  <Link href="#" className="text-slate-500 dark:text-slate-400 hover:text-emerald-500 text-sm transition-colors">{item}</Link>
+              {[
+                { name: 'About Us', href: '/about' },
+                { name: 'Community', href: '/community' },
+                { name: 'Expert Mentors', href: '#' },
+                { name: 'Success Stories', href: '#' },
+                { name: 'Contact Support', href: '/contact' }
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link href={item.href} className="text-slate-500 dark:text-slate-400 hover:text-emerald-500 text-sm transition-colors">{item.name}</Link>
                 </li>
               ))}
             </ul>
@@ -85,7 +91,7 @@ export function Footer() {
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
                   <Phone className="w-4 h-4 text-emerald-500" />
                 </div>
-                +91 98765 43210 (Inquiry: Krishna)
+                +91 98765 43210 (Inquiry)
               </li>
               <li className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
                 <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">

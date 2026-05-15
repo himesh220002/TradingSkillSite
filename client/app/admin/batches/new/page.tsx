@@ -26,6 +26,7 @@ export default function NewBatch() {
     status: 'Upcoming',
     trainer: 'Krishna Sharma',
     meetingLink: '',
+    maxStudents: 50,
     practicalCount: 0,
     testsConducted: 0,
     assignmentsDue: 0
@@ -168,11 +169,11 @@ export default function NewBatch() {
         <div className="space-y-6">
           <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 text-xs flex items-center gap-2"><Users className="w-3 h-3" /> Initial Student Count</label>
+              <label className="text-sm font-bold text-slate-700 dark:text-slate-300 text-xs flex items-center gap-2"><Users className="w-3 h-3" /> Seat Capacity (Max Students)</label>
               <input
                 type="number"
-                value={formData.studentCount}
-                onChange={(e) => setFormData({ ...formData, studentCount: Number(e.target.value) })}
+                value={formData.maxStudents}
+                onChange={(e) => setFormData({ ...formData, maxStudents: Number(e.target.value) })}
                 className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-bold"
               />
             </div>

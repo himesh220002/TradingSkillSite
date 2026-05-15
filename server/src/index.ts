@@ -8,6 +8,8 @@ import batchRoutes from './routes/batchRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import studentProgressRoutes from './routes/studentProgressRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import communityRoutes from './routes/communityRoutes.js';
 
 dotenv.config();
 
@@ -15,7 +17,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
 // MongoDB Connection
@@ -36,6 +41,8 @@ app.use('/api/batches', batchRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/student-progress', studentProgressRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/community', communityRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

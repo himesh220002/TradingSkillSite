@@ -50,6 +50,7 @@ export default function CoursePage() {
             title: c.title,
             description: c.description,
             price: `$${c.price}`,
+            discountPrice: c.discountPrice ? `$${c.discountPrice}` : null,
             duration: c.duration || '3 Months',
             level: c.level || 'Beginner',
             enrolled: c.enrolledStudents || 0,
@@ -146,7 +147,16 @@ export default function CoursePage() {
                   </div>
 
                   <div className="mt-auto flex items-center justify-between gap-4">
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{course.price}</div>
+                    <div className="flex flex-col">
+                      <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {course.discountPrice || course.price}
+                      </div>
+                      {course.discountPrice && (
+                        <div className="text-[10px] font-bold text-slate-400 line-through">
+                          {course.price}
+                        </div>
+                      )}
+                    </div>
                     <Link href={`/course/${course.id}`} className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-full text-sm font-bold transition-all hover:scale-105">
                       Enrol Now
                       <ArrowRight className="w-4 h-4" />

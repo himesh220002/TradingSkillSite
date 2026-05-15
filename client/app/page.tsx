@@ -24,6 +24,7 @@ import {
 import { MarketTicker } from "@/components/market-ticker";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/api-config";
 
 const STEPS = [
   {
@@ -79,7 +80,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/stats/overview')
+    fetch(`${API_BASE_URL}/api/stats/overview`)
       .then(res => res.json())
       .then(data => {
         const studentStat = data.stats.find((s: any) => s.name === 'Total Students');

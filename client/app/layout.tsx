@@ -23,11 +23,11 @@ export const metadata: Metadata = {
   },
   description: "Join Krishna's premier Trading Skills Class in Katihar, Bihar. Master Technical Analysis, Risk Management, and Market Psychology with the best stock market training in India.",
   keywords: [
-    "Trading Skills Class Katihar", 
-    "Stock Market Training Bihar", 
-    "Krishna Trading Academy", 
-    "Technical Analysis Course India", 
-    "Best Trading Classes in Katihar", 
+    "Trading Skills Class Katihar",
+    "Stock Market Training Bihar",
+    "Krishna Trading Academy",
+    "Technical Analysis Course India",
+    "Best Trading Classes in Katihar",
     "Learn Stock Trading Bihar",
     "Share Market Classes Hindi",
     "Intraday Trading Course Krishna"
@@ -88,8 +88,8 @@ export default function RootLayout({
               "@type": "EducationalOrganization",
               "name": "Trading Skill Trainer",
               "description": "Premium stock market training and trading skills classes led by Krishna.",
-              "url": "https://tradingskilltrainer.com",
-              "logo": "https://tradingskilltrainer.com/logo.png",
+              "url": "https://tradingXskill.com",
+              "logo": "https://tradingXskill.com/logo.png",
               "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "Katihar",

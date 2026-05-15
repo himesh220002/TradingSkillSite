@@ -154,7 +154,16 @@ export default function CourseDetailPage() {
                   Enter Classroom <ArrowRight className="w-5 h-5" />
                 </Link>
               ) : (
-                <button className="flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-10 py-5 rounded-2xl font-black transition-all shadow-xl shadow-emerald-500/20 active:scale-95">
+                <button
+                  onClick={() => {
+                    if (!isLoggedIn) {
+                      router.push(`/portal?redirect=/course/${id}`);
+                    } else {
+                      router.push(`/course/${id}/checkout`);
+                    }
+                  }}
+                  className="flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-10 py-5 rounded-2xl font-black transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
+                >
                   Enroll in Course <ArrowRight className="w-5 h-5" />
                 </button>
               )}
@@ -343,9 +352,27 @@ export default function CourseDetailPage() {
               </div>
 
               <div className="space-y-4">
-                <button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black text-lg transition-all shadow-xl shadow-emerald-500/20 active:scale-95">
-                  Secure Enrollment
-                </button>
+                {isEnrolled && enrolledBatchId ? (
+                  <Link
+                    href={`/course/${id}/${enrolledBatchId}`}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black text-lg transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-3"
+                  >
+                    Enter Classroom <ArrowRight className="w-5 h-5" />
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (!isLoggedIn) {
+                        router.push(`/portal?redirect=/course/${id}`);
+                      } else {
+                        router.push(`/course/${id}/checkout`);
+                      }
+                    }}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black text-lg transition-all shadow-xl shadow-emerald-500/20 active:scale-95"
+                  >
+                    Secure Enrollment
+                  </button>
+                )}
                 <div className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
                   <ShieldCheck className="w-3 h-3" /> 30-Day Money Back Guarantee
                 </div>
@@ -355,7 +382,7 @@ export default function CourseDetailPage() {
                 <h5 className="text-xs font-black text-slate-400 uppercase tracking-widest">This course includes:</h5>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <Video className="w-4 h-4 text-emerald-500" /> {course.duration} High-res video content
+                    <Video className="w-4 h-4 text-emerald-500" /> {course.duration} High-res online video lessons
                   </div>
                   <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
                     <BookOpen className="w-4 h-4 text-emerald-500" /> Full lifetime access

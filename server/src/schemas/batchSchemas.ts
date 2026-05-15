@@ -4,6 +4,7 @@ export const createBatchSchema = z.object({
   body: z.object({
     batchName: z.string().min(3, "Batch name must be at least 3 characters"),
     courseId: z.string().min(1, "Course selection is required"),
+    maxStudents: z.number().optional(),
     syllabus: z.array(z.object({
       topic: z.string().min(1, "Topic title is required"),
       sectionName: z.string().optional(),
@@ -26,5 +27,15 @@ export const switchStudentSchema = z.object({
     userId: z.string().min(1, "User ID is required"),
     fromBatchId: z.string().min(1, "Source batch ID is required"),
     toBatchId: z.string().min(1, "Destination batch ID is required")
+  })
+});
+
+export const autoEnrollSchema = z.object({
+  body: z.object({
+    userId: z.string().min(1, "User ID is required"),
+    courseId: z.string().min(1, "Course ID is required"),
+    paymentMethod: z.enum(['online', 'manual']),
+    amount: z.number().positive(),
+    transactionId: z.string().optional()
   })
 });

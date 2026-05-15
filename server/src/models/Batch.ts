@@ -14,7 +14,7 @@ export interface IBatch extends Document {
   studentCount: number;
   students: mongoose.Types.ObjectId[];
   startDate: Date;
-  status: 'Upcoming' | 'Ongoing' | 'Completed' | 'On Hold';
+  maxStudents: number;
   trainer: string;
   meetingLink: string;
   practicalCount: number;
@@ -25,6 +25,20 @@ export interface IBatch extends Document {
   sharedLinks: { title: string; url: string; category?: string }[];
   resources: { title: string; type: 'pdf' | 'doc' | 'link'; url: string }[];
   internalNotes: string;
+  status: 'Upcoming' | 'Ongoing' | 'Completed' | 'On Hold';
+  generalSchedule: {
+    dayOfWeek: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+    startTime: string;
+    endTime: string;
+    type: 'Class' | 'Off';
+  }[];
+  schedule: {
+    date: Date;
+    startTime?: string;
+    endTime?: string;
+    type: 'Class' | 'Off' | 'Event';
+    note?: string;
+  }[];
   createdAt: Date;
 }
 
@@ -34,6 +48,7 @@ const BatchSchema: Schema = new Schema({
   studentCount: { type: Number, default: 0 },
   students: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   startDate: { type: Date, required: true },
+  maxStudents: { type: Number, default: 50 },
   status: {
     type: String,
     enum: ['Upcoming', 'Ongoing', 'Completed', 'On Hold'],
@@ -61,6 +76,19 @@ const BatchSchema: Schema = new Schema({
     title: { type: String, required: true },
     type: { type: String, enum: ['pdf', 'doc', 'link'], default: 'link' },
     url: { type: String, required: true }
+  }],
+  generalSchedule: [{
+    dayOfWeek: { type: String, enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
+    type: { type: String, enum: ['Class', 'Off'], default: 'Class' }
+  }],
+  schedule: [{
+    date: { type: Date, required: true },
+    startTime: { type: String },
+    endTime: { type: String },
+    type: { type: String, enum: ['Class', 'Off', 'Event'], default: 'Class' },
+    note: { type: String }
   }],
   internalNotes: { type: String },
   createdAt: { type: Date, default: Date.now },

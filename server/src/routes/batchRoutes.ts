@@ -3,9 +3,76 @@ import Batch from '../models/Batch.js';
 import Course from '../models/Course.js';
 import User from '../models/User.js';
 import { validate } from '../middleware/validate.js';
-import { createBatchSchema, enrollStudentSchema, switchStudentSchema } from '../schemas/batchSchemas.js';
+import { createBatchSchema, enrollStudentSchema, switchStudentSchema, autoEnrollSchema } from '../schemas/batchSchemas.js';
+import Enrollment from '../models/Enrollment.js';
+
+import Transaction from '../models/Transaction.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
+
+// Helper to clean old schedule items and merge with general schedule
+const processBatchSchedule = async (batch: any) => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  // 1. Remove expired specific schedule items
+  let changed = false;
+  const originalScheduleCount = batch.schedule?.length || 0;
+  if (batch.schedule) {
+    batch.schedule = batch.schedule.filter((item: any) => {
+      const itemDate = new Date(item.date);
+      itemDate.setHours(23, 59, 59, 999); // Keep until end of day
+      return itemDate >= now;
+    });
+    if (batch.schedule.length !== originalScheduleCount) changed = true;
+  }
+
+  if (changed) await batch.save();
+
+  // 2. Generate merged schedule for next 7 days
+  const mergedSchedule = [];
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  for (let i = 0; i < 7; i++) {
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + i);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    const dayName = daysOfWeek[targetDate.getDay()];
+    const targetDateStr = targetDate.toISOString().split('T')[0];
+
+    // Check for specific override
+    const override = batch.schedule?.find((s: any) => 
+      new Date(s.date).toISOString().split('T')[0] === targetDateStr
+    );
+
+    if (override) {
+      mergedSchedule.push({
+        date: targetDate,
+        startTime: override.startTime,
+        endTime: override.endTime,
+        type: override.type,
+        note: override.note,
+        isOverride: true
+      });
+    } else {
+      // Check for general slot
+      const generalSlot = batch.generalSchedule?.find((gs: any) => gs.dayOfWeek === dayName);
+      if (generalSlot) {
+        mergedSchedule.push({
+          date: targetDate,
+          startTime: generalSlot.startTime,
+          endTime: generalSlot.endTime,
+          type: generalSlot.type,
+          isOverride: false
+        });
+      }
+    }
+  }
+
+  return { ...batch.toObject(), combinedSchedule: mergedSchedule };
+};
 
 // Get all batches with course details + enrolled students
 router.get('/', async (req, res) => {
@@ -13,7 +80,30 @@ router.get('/', async (req, res) => {
     const batches = await Batch.find()
       .populate('courseId', 'title _id')
       .populate('students', '_id username role');
-    res.json(batches);
+
+    // Auto-fix statuses based on date
+    const now = new Date();
+    const updatedBatches = await Promise.all(batches.map(async (batch) => {
+      const batchDate = new Date(batch.startDate);
+      let changed = false;
+      
+      if (batchDate <= now) {
+        if (batch.status === 'Upcoming') {
+          batch.status = 'Ongoing';
+          changed = true;
+        }
+      } else {
+        if (batch.status === 'Ongoing') {
+          batch.status = 'Upcoming';
+          changed = true;
+        }
+      }
+
+      if (changed) await batch.save();
+      return batch;
+    }));
+
+    res.json(await Promise.all(updatedBatches.map(b => processBatchSchedule(b))));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching batches', error });
   }
@@ -26,7 +116,7 @@ router.get('/:id', async (req, res) => {
       .populate('courseId', 'title _id')
       .populate('students', '_id username role');
     if (!batch) return res.status(404).json({ message: 'Batch not found' });
-    res.json(batch);
+    res.json(await processBatchSchedule(batch));
   } catch (error) {
     res.status(500).json({ message: 'Error fetching batch', error });
   }
@@ -225,10 +315,39 @@ router.patch('/:id/topic/:topicId', async (req, res) => {
 // Update general batch info
 router.put('/:id', async (req, res) => {
   try {
-    const batch = await Batch.findById(req.params.id);
+    const batch = await Batch.findById(req.params.id).populate('courseId', 'title');
     if (!batch) return res.status(404).json({ message: 'Batch not found' });
     
+    const oldDateStr = new Date(batch.startDate).toDateString();
+    const newDateStr = req.body.startDate ? new Date(req.body.startDate).toDateString() : oldDateStr;
+
+    // 1. If date changed, notify students
+    if (req.body.startDate && oldDateStr !== newDateStr) {
+      const courseTitle = (batch.courseId as any)?.title || 'your course';
+      const notifications = batch.students.map(studentId => ({
+        userId: studentId,
+        title: 'Batch Rescheduled',
+        message: `Your batch "${batch.batchName}" for ${courseTitle} has been rescheduled to ${new Date(req.body.startDate).toLocaleDateString()}.`,
+        type: 'warning'
+      }));
+      if (notifications.length > 0) {
+        await Notification.insertMany(notifications);
+      }
+    }
+
+    // 2. Apply updates
     Object.assign(batch, req.body);
+
+    // 3. Auto-fix status if date has passed
+    const now = new Date();
+    const batchDate = new Date(batch.startDate);
+    if (batchDate <= now) {
+      if (batch.status === 'Upcoming') batch.status = 'Ongoing';
+    } else {
+      // If rescheduled to future, move back to Upcoming
+      if (batch.status === 'Ongoing') batch.status = 'Upcoming';
+    }
+
     await batch.save();
 
     const populated = await Batch.findById(req.params.id)
@@ -255,6 +374,74 @@ router.delete('/:id', async (req, res) => {
     res.json({ message: 'Batch deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting batch', error });
+  }
+});
+
+// ── Auto-Enrollment (Checkout Flow) ─────────────────────────────────────────
+
+router.post('/auto-enroll', validate(autoEnrollSchema), async (req, res) => {
+  try {
+    const { userId, courseId, paymentMethod, amount, transactionId } = req.body;
+
+    // 1. Find next "Upcoming" batch for this course that isn't full
+    const nextBatch = await Batch.findOne({ 
+      courseId, 
+      status: 'Upcoming',
+      $expr: { $lt: [{ $size: "$students" }, "$maxStudents"] }
+    }).sort({ startDate: 1 });
+
+    if (!nextBatch) {
+      return res.status(404).json({ message: 'No upcoming batches found with available seats.' });
+    }
+
+    // 2. Check if user already in this batch
+    const alreadyEnrolled = nextBatch.students.some((s: any) => s.toString() === userId);
+    if (alreadyEnrolled) {
+      return res.status(400).json({ message: 'User is already enrolled in the next upcoming batch.' });
+    }
+
+    // 3. Create Enrollment (Ticket)
+    const enrollment = new Enrollment({
+      userId,
+      courseId,
+      batchId: nextBatch._id,
+      amount,
+      paymentMethod,
+      transactionId,
+      paymentStatus: paymentMethod === 'online' ? 'completed' : 'pending'
+    });
+    await enrollment.save();
+
+    // 4. Create Transaction Record (Audit Trail)
+    const transaction = new Transaction({
+      userId,
+      courseId,
+      batchId: nextBatch._id,
+      amount,
+      paymentMethod,
+      transactionId,
+      status: paymentMethod === 'online' ? 'completed' : 'pending'
+    });
+    await transaction.save();
+
+    // 4. If online, add to batch immediately
+    if (paymentMethod === 'online') {
+      nextBatch.students.push(userId);
+      nextBatch.studentCount = nextBatch.students.length;
+      await nextBatch.save();
+
+      await User.findByIdAndUpdate(userId, { 
+        $addToSet: { enrolledBatches: nextBatch._id } 
+      });
+    }
+
+    res.status(201).json({
+      message: paymentMethod === 'online' ? 'Enrollment successful!' : 'Manual payment request received.',
+      enrollment,
+      batch: nextBatch
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error processing auto-enrollment', error });
   }
 });
 

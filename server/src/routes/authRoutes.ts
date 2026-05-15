@@ -65,7 +65,7 @@ router.get('/profile/:id', async (req, res) => {
       });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // For each batch, fetch the student's personal progress
+    // For each batch, fetch the student's personal progress AND process the combined schedule
     const enrichedBatches = await Promise.all(user.enrolledBatches.map(async (batch: any) => {
       const progress = await StudentProgress.findOne({ userId: user._id, batchId: batch._id });
       
@@ -74,10 +74,53 @@ router.get('/profile/:id', async (req, res) => {
         personalProgressPercentage = Math.round((progress.completedTopics.length / batch.topicProgress.length) * 100);
       }
 
+      // Generate merged schedule for next 7 days for THIS batch
+      const mergedSchedule = [];
+      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const now = new Date();
+      now.setHours(0,0,0,0);
+
+      for (let i = 0; i < 7; i++) {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + i);
+        targetDate.setHours(0, 0, 0, 0);
+        
+        const dayName = daysOfWeek[targetDate.getDay()];
+        const targetDateStr = targetDate.toISOString().split('T')[0];
+
+        // Check for specific override in batch.schedule
+        const override = batch.schedule?.find((s: any) => 
+          new Date(s.date).toISOString().split('T')[0] === targetDateStr
+        );
+
+        if (override) {
+          mergedSchedule.push({
+            date: targetDate,
+            startTime: override.startTime,
+            endTime: override.endTime,
+            type: override.type,
+            note: override.note,
+            isOverride: true
+          });
+        } else {
+          // Check for general recurring slot
+          const generalSlot = batch.generalSchedule?.find((gs: any) => gs.dayOfWeek === dayName);
+          if (generalSlot) {
+            mergedSchedule.push({
+              date: targetDate,
+              startTime: generalSlot.startTime,
+              endTime: generalSlot.endTime,
+              type: generalSlot.type,
+              isOverride: false
+            });
+          }
+        }
+      }
+
       return {
         ...batch.toObject(),
-        progressPercentage: personalProgressPercentage, // Override with personal progress
-        isBatchProgress: batch.progressPercentage // Keep batch progress just in case
+        progressPercentage: personalProgressPercentage,
+        combinedSchedule: mergedSchedule
       };
     }));
 

@@ -7,6 +7,9 @@ export interface IUser extends Document {
   password: string;
   role: 'student' | 'admin';
   enrolledBatches: mongoose.Types.ObjectId[];
+  dailyGlobalChats: number;
+  dailyBatchQuestions: number;
+  lastLimitResetDate: Date;
   createdAt: Date;
 }
 
@@ -21,6 +24,9 @@ const UserSchema: Schema = new Schema({
   github: { type: String },
   avatar: { type: String },
   enrolledBatches: [{ type: Schema.Types.ObjectId, ref: 'Batch' }],
+  dailyGlobalChats: { type: Number, default: 0 },
+  dailyBatchQuestions: { type: Number, default: 0 },
+  lastLimitResetDate: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingXSkill | Community Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        
+        :root {
+            --emerald: #10b981;
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-400: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--slate-900);
+            color: white;
+            margin: 0;
+            padding: 40px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 { font-size: 3rem; font-weight: 900; letter-spacing: -0.05em; margin-bottom: 10px; }
+        h1 span { color: var(--emerald); }
+        .subtitle { color: var(--slate-400); font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.8rem; margin-bottom: 60px; }
+
+        .section {
+            background: var(--slate-800);
+            border-radius: 2rem;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h2 { font-size: 1.5rem; font-weight: 900; margin-bottom: 20px; border-left: 4px solid var(--emerald); padding-left: 20px; }
+        
+        .mermaid {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 1rem;
+            margin: 20px 0;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.02);
+            padding: 20px;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .feature-card h3 { font-size: 0.9rem; color: var(--emerald); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0; }
+        .feature-card p { font-size: 0.85rem; color: var(--slate-400); margin-bottom: 0; }
+    </style>
+</head>
+<body>
+    <div class="container" style="margin: 0 auto;">
+        <header>
+            <h1>Community <span>Pulse</span></h1>
+            <p class="subtitle">Ideal Communication Architecture for TradingXSkill</p>
+        </header>
+
+        <div class="section">
+            <h2>1. Structural Ecosystem</h2>
+            <p>The community is divided into **Global Lounges** and **Batch-Locked War Rooms** to balance general networking with focused learning.</p>
+            <div class="mermaid">
+                graph TD
+                A[Student Entry] --> B{Role Check}
+                B -->|Free/Public| C[Global Lounge]
+                B -->|Enrolled| D[Batch War Rooms]
+                D --> E[Specific Batch Room]
+                E --> F[Q&A Thread]
+                E --> G[Trade Logs]
+                E --> H[Live Stream Chat]
+                C --> I[General Discussion]
+                C --> J[Success Stories]
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. Trainer-Student Feedback Loop</h2>
+            <p>Ensuring trainers can broadcast high-signal information while students get their queries resolved without noise.</p>
+            <div class="mermaid">
+                sequenceDiagram
+                participant S as Student
+                participant T as Trainer
+                participant B as Bot / AI
+                S->>B: Asks "What is RSI divergence?"
+                B->>S: Suggests Lesson 4 Video Link
+                S->>T: Still confused, tags Trainer
+                T->>S: Records 30s Loom Video Response
+                T->>S: Marks Query as "SOLVED"
+                Note over S,T: Solution added to batch Knowledge Base
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. Trade Setup Verification Flow</h2>
+            <p>A gamified way for students to share charts and get peer/trainer validation.</p>
+            <div class="mermaid">
+                graph LR
+                A[Share Setup] --> B[Upload Chart Image]
+                B --> C[Add Strategy Tag: SMC/PriceAction]
+                C --> D[Community Voting]
+                D -->|Upvoted| E[Trending Setup]
+                D -->|Trainer Verified| F[Model Trade Badge]
+                F --> G[Leaderboard Points]
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Core Pillars</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h3>Threaded Q&A</h3>
+                    <p>Instead of messy group chats, use threaded discussions linked to specific course modules for easier searching.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Analysis Showcase</h3>
+                    <p>A dedicated gallery for students to post their daily technical analysis for peer review.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Live Trade Floor</h3>
+                    <p>A real-time text-based "floor" for quick signals and market updates during live trading hours.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Institutional Broadcasts</h3>
+                    <p>Tutors can push "Urgent Market Shifts" or "Class Postponed" notifications directly into the community feed.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer style="margin-top: 80px; opacity: 0.3; text-align: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3em;">
+            &copy; 2026 TradingXSkill Engineering Team
+        </footer>
+    </div>
+</body>
+</html>
