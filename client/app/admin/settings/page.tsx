@@ -47,7 +47,7 @@ export default function AdminSettings() {
         <p className="text-slate-500 dark:text-slate-400">Manage your administrative security and global configurations.</p>
       </div>
 
-      <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-8">
+      <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-8">
         <div className="flex items-center gap-4 pb-6 border-b border-black/5 dark:border-white/5">
           <div className="p-3 bg-emerald-500/10 rounded-2xl">
             <Lock className="w-6 h-6 text-emerald-500" />
@@ -62,24 +62,24 @@ export default function AdminSettings() {
           <div className="grid gap-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">New Password</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password" 
+                placeholder="Enter new password"
                 className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Confirm New Password</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password" 
+                placeholder="Confirm new password"
                 className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
@@ -95,7 +95,7 @@ export default function AdminSettings() {
             </div>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
@@ -106,7 +106,7 @@ export default function AdminSettings() {
         </form>
       </div>
 
-      <div className="p-8 rounded-[2.5rem] bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-6">
+      <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-6">
         <div className="p-4 bg-emerald-500/10 rounded-3xl">
           <ShieldCheck className="w-8 h-8 text-emerald-500" />
         </div>

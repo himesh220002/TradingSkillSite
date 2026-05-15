@@ -29,9 +29,9 @@ import { useDebounce } from "@/hooks/use-debounce";
 interface EnrolledBatch {
   _id: string;
   batchName: string;
-  courseId: { 
-    _id: string; 
-    title: string; 
+  courseId: {
+    _id: string;
+    title: string;
     price: number;
     bannerImage: string;
   };
@@ -47,7 +47,7 @@ interface Student {
   linkedin?: string;
   github?: string;
   role: 'student' | 'admin';
-  enrolledBatches: any[]; 
+  enrolledBatches: any[];
   createdAt: string;
 }
 
@@ -68,10 +68,10 @@ export default function AdminStudents() {
   const [batches, setBatches] = useState<Batch[]>(cache.batches || []);
   const [loading, setLoading] = useState(!cache.students);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
-  
+
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Profile modal state
@@ -101,10 +101,10 @@ export default function AdminStudents() {
 
       const users = await usersRes.json();
       const batchData = await batchesRes.json();
-      
+
       setStudents(users);
       setBatches(batchData);
-      
+
       // Update Cache
       cache.students = users;
       cache.batches = batchData;
@@ -333,10 +333,10 @@ export default function AdminStudents() {
               {profileLoading ? (
                 <div className="space-y-12">
                   <div className="grid lg:grid-cols-3 gap-12">
-                    <Skeleton className="h-64 rounded-[2.5rem]" />
+                    <Skeleton className="h-64 rounded-[1.5rem] md:rounded-[2.5rem]" />
                     <div className="lg:col-span-2 space-y-6">
-                      <Skeleton className="h-40 rounded-[2.5rem]" />
-                      <Skeleton className="h-40 rounded-[2.5rem]" />
+                      <Skeleton className="h-40 rounded-[1.5rem] md:rounded-[2.5rem]" />
+                      <Skeleton className="h-40 rounded-[1.5rem] md:rounded-[2.5rem]" />
                     </div>
                   </div>
                 </div>
@@ -344,7 +344,7 @@ export default function AdminStudents() {
                 <div className="grid lg:grid-cols-3 gap-12">
                   {/* Personal Info */}
                   <div className="space-y-10">
-                    <div className="p-8 rounded-[2.5rem] bg-slate-900 text-white dark:bg-slate-950 border border-white/5 text-center relative overflow-hidden group">
+                    <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-900 text-white dark:bg-slate-950 border border-white/5 text-center relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
                         <ShieldAlert className="w-24 h-24" />
                       </div>
@@ -353,7 +353,7 @@ export default function AdminStudents() {
                       </div>
                       <h3 className="text-2xl font-black leading-tight">{profileModal.student.name || profileModal.student.username}</h3>
                       <p className="text-emerald-400 text-xs font-black uppercase tracking-widest mt-1 italic">@{profileModal.student.username}</p>
-                      
+
                       <div className="mt-8 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
                         <code className="text-[10px] font-mono bg-white/5 px-4 py-2 rounded-xl text-slate-400">
                           ID: {profileModal.student._id}
@@ -364,7 +364,7 @@ export default function AdminStudents() {
                       </div>
                     </div>
 
-                    <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-800/50 border border-black/5 dark:border-white/5 space-y-6">
+                    <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-800/50 border border-black/5 dark:border-white/5 space-y-6">
                       <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 border-b border-black/5 pb-4">Communication</h4>
                       <div className="space-y-4">
                         <div className="flex items-center gap-4 group/item">
@@ -409,7 +409,7 @@ export default function AdminStudents() {
                         <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                           <GraduationCap className="w-6 h-6 text-emerald-500" /> Academic Journey
                         </h3>
-                        <button 
+                        <button
                           onClick={() => { setProfileModal({ open: false, student: null }); openEnroll(profileModal.student!); }}
                           className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-emerald-500/20"
                         >
@@ -420,7 +420,7 @@ export default function AdminStudents() {
                       {profileModal.student.enrolledBatches && profileModal.student.enrolledBatches.length > 0 ? (
                         <div className="grid md:grid-cols-2 gap-6">
                           {profileModal.student.enrolledBatches.map((batch: any) => (
-                            <div key={batch._id} className="p-6 rounded-[2.5rem] bg-white dark:bg-slate-800/50 border border-black/5 dark:border-white/5 group hover:shadow-xl transition-all">
+                            <div key={batch._id} className="p-6 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-800/50 border border-black/5 dark:border-white/5 group hover:shadow-xl transition-all">
                               <div className="flex items-center justify-between mb-6">
                                 <span className={cn(
                                   "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
@@ -434,7 +434,7 @@ export default function AdminStudents() {
                                 {batch.courseId?.title || 'Unknown Course'}
                               </h5>
                               <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-widest">{batch.batchName}</p>
-                              
+
                               <div className="mt-8 space-y-3">
                                 <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
                                   <span>Batch Progress</span>
@@ -459,7 +459,7 @@ export default function AdminStudents() {
                       <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
                         <CreditCard className="w-6 h-6 text-purple-500" /> Payment Records
                       </h3>
-                      <div className="overflow-hidden rounded-[2.5rem] border border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-slate-800/20">
+                      <div className="overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] border border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-slate-800/20">
                         <table className="w-full text-left">
                           <thead>
                             <tr className="border-b border-black/5 dark:border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400 bg-slate-100/50 dark:bg-slate-800/50">
@@ -492,7 +492,7 @@ export default function AdminStudents() {
             </div>
 
             <div className="p-8 border-t border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/20 flex items-center justify-end gap-4 shrink-0">
-               <button 
+              <button
                 onClick={() => setProfileModal({ open: false, student: null })}
                 className="px-10 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest hover:bg-emerald-500 dark:hover:bg-emerald-500 hover:text-white transition-all shadow-xl active:scale-95"
               >

@@ -117,7 +117,7 @@ export default function GlobalLounge() {
   return (
     <div className="space-y-8 sm:space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       {/* Welcome Hero - Responsive */}
-      <div className="relative p-8 sm:p-14 rounded-[2.5rem] sm:rounded-[3rem] bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent border border-emerald-500/20 overflow-hidden shadow-2xl">
+      <div className="relative p-8 sm:p-14 rounded-[1.5rem] md:rounded-[2.5rem] sm:rounded-[3rem] bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent border border-emerald-500/20 overflow-hidden shadow-2xl">
         <div className="absolute top-0 right-0 p-8 sm:p-12 opacity-5 pointer-events-none">
           <Users className="w-48 h-48 sm:w-64 sm:h-64 text-emerald-400" />
         </div>
@@ -134,7 +134,7 @@ export default function GlobalLounge() {
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 sm:gap-10">
         {/* Discussion Chat Area - Taking 8 columns */}
-        <div className="xl:col-span-8 flex flex-col h-[550px] sm:h-[750px] rounded-[2.5rem] bg-slate-900/40 border border-white/5 overflow-hidden shadow-2xl">
+        <div className="xl:col-span-8 flex flex-col h-[550px] sm:h-[750px] rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-900/40 border border-white/5 overflow-hidden shadow-2xl">
           <div className="p-6 border-b border-white/5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-black text-white flex items-center gap-3">
@@ -146,13 +146,13 @@ export default function GlobalLounge() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Live</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Live</span>
             </div>
           </div>
 
           {/* Chat Messages */}
-          <div 
+          <div
             ref={scrollRef}
             className="flex-grow overflow-y-auto p-6 space-y-6 no-scrollbar"
           >
@@ -204,8 +204,8 @@ export default function GlobalLounge() {
                 </span>
               </div>
               <div className="flex gap-4">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -213,7 +213,7 @@ export default function GlobalLounge() {
                   placeholder={(limits?.used ?? 0) >= (limits?.limit ?? 5) ? "Daily limit reached. Reset at 12AM." : "Type your message..."}
                   className="flex-grow bg-slate-900/60 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
-                <button 
+                <button
                   onClick={handleSendMessage}
                   disabled={(limits?.used ?? 0) >= (limits?.limit ?? 5) || !newMessage.trim() || newMessage.length > (limits?.charLimit ?? 400)}
                   className="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale"
@@ -232,8 +232,8 @@ export default function GlobalLounge() {
               <Trophy className="w-6 h-6 text-yellow-500" />
               Top Gains
             </h3>
-            
-            <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-yellow-500/10 via-slate-900/40 to-slate-900/40 border border-yellow-500/20 shadow-xl">
+
+            <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-gradient-to-br from-yellow-500/10 via-slate-900/40 to-slate-900/40 border border-yellow-500/20 shadow-xl">
               <h4 className="text-xs font-black text-yellow-500 uppercase tracking-[0.25em] mb-8">Profit Hall of Fame</h4>
               <div className="space-y-6">
                 {[

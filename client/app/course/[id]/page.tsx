@@ -176,7 +176,7 @@ export default function CourseDetailPage() {
           </div>
 
           <div className="relative group">
-            <div className="aspect-video bg-slate-800 rounded-[2.5rem] overflow-hidden border-8 border-white/5 shadow-2xl relative">
+            <div className="aspect-video bg-slate-800 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden border-8 border-white/5 shadow-2xl relative">
               <img
                 src={course.bannerImage}
                 alt={course.title}
@@ -407,7 +407,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Newsletter/Promo */}
-            <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white space-y-4">
+            <div className="bg-slate-900 p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-white space-y-4">
               <h4 className="font-bold flex items-center gap-2"><Lock className="w-4 h-4 text-emerald-500" /> Institutional Membership</h4>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Unlock 10+ professional trading courses and live trading room access for one flat fee.

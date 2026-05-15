@@ -52,10 +52,10 @@ export default function AdminLogin() {
           <p className="text-slate-500 text-sm mt-2 font-medium tracking-wide uppercase">Institutional access only</p>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative overflow-hidden group">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[1.5rem] md:rounded-[2.5rem] p-8 md:p-10 shadow-2xl relative overflow-hidden group">
           {/* Decorative gradients */}
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 blur-[80px] rounded-full group-hover:bg-emerald-500/20 transition-all duration-700" />
-          
+
           <form onSubmit={handleLogin} className="relative z-10 space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest ml-4">Terminal Password</label>

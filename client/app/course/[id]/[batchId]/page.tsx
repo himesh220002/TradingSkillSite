@@ -7,7 +7,7 @@ import { API_BASE_URL } from '@/lib/api-config';
 import {
   ArrowLeft, CheckCircle2, Circle, PlayCircle, BookOpen, FileText,
   Lightbulb, HelpCircle, Link as LinkIcon, Video, ExternalLink,
-  TrendingUp, Users, Calendar, ChevronRight, ChevronDown, Lock, X
+  TrendingUp, Users, Calendar, ChevronRight, ChevronDown, Lock, X, Menu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import TradingChart from '@/components/TradingChart';
@@ -179,7 +179,7 @@ export default function ClassroomPage() {
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="lg:hidden p-2 rounded-xl bg-white/5 text-slate-300 hover:text-white"
           >
-            <BookOpen className="w-5 h-5" />
+            <Menu className="w-5 h-5" />
           </button>
         </div>
 
@@ -294,7 +294,7 @@ export default function ClassroomPage() {
         </aside>
 
         {/* ── Main Content Area ───────────────────────────────────── */}
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
           {!lesson ? (
             <div className="flex-1 flex items-center justify-center text-slate-500 p-8">
@@ -350,7 +350,7 @@ export default function ClassroomPage() {
               </div>
 
               {/* Tab Content */}
-              <div className="flex-1 overflow-y-auto p-6 sm:p-8 no-scrollbar">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-8 no-scrollbar min-w-0">
 
                 {activeTab === 'notes' && (
                   <div className="max-w-4xl space-y-6">

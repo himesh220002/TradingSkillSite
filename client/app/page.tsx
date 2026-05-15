@@ -257,7 +257,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="group p-10 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/50 border border-black/5 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-slate-800 hover:shadow-2xl">
+            <div className="group p-10 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/50 border border-black/5 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-slate-800 hover:shadow-2xl">
               <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-8 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
                 <BarChart3 className="w-7 h-7" />
               </div>
@@ -265,7 +265,7 @@ export default function Home() {
               <p className="text-sm text-slate-500 font-medium leading-relaxed">Practice with real market simulations. Visualize confluent zones and master price action before risking real capital.</p>
             </div>
 
-            <div className="group p-10 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/50 border border-black/5 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-slate-800 hover:shadow-2xl">
+            <div className="group p-10 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/50 border border-black/5 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-slate-800 hover:shadow-2xl">
               <div className="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-8 text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-all duration-500">
                 <Users className="w-7 h-7" />
               </div>

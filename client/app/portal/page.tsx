@@ -86,7 +86,7 @@ export default function PortalPage() {
         </div>
 
         {/* Login Card */}
-        <div className="bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] shadow-xl shadow-black/5 border border-black/5 dark:border-white/5 space-y-8 relative overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 p-10 rounded-[1.5rem] md:rounded-[2.5rem] shadow-xl shadow-black/5 border border-black/5 dark:border-white/5 space-y-8 relative overflow-hidden">
           {/* Visual Accents */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] -mr-16 -mt-16" />
 

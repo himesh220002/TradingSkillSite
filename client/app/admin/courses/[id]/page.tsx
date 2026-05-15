@@ -108,18 +108,18 @@ export default function EditCourse() {
       const course = await res.json();
       if (course) {
         setFormData({
-          title:           course.title           ?? '',
-          subtitle:        course.subtitle         ?? '',
-          description:     course.description      ?? '',
-          bannerImage:     course.bannerImage       ?? '',
-          videoPreviewUrl: course.videoPreviewUrl   ?? '',
-          price:           String(course.price      ?? ''),
-          discountPrice:   course.discountPrice != null ? String(course.discountPrice) : '',
-          currency:        course.currency          ?? 'USD',
-          duration:        course.duration          ?? '3 Months',
-          level:           course.level             ?? 'Beginner',
-          category:        course.category          ?? 'Trading',
-          instructor:      course.instructor        ?? 'Krishna Sharma',
+          title: course.title ?? '',
+          subtitle: course.subtitle ?? '',
+          description: course.description ?? '',
+          bannerImage: course.bannerImage ?? '',
+          videoPreviewUrl: course.videoPreviewUrl ?? '',
+          price: String(course.price ?? ''),
+          discountPrice: course.discountPrice != null ? String(course.discountPrice) : '',
+          currency: course.currency ?? 'USD',
+          duration: course.duration ?? '3 Months',
+          level: course.level ?? 'Beginner',
+          category: course.category ?? 'Trading',
+          instructor: course.instructor ?? 'Krishna Sharma',
         });
 
         if (course.curriculum && course.curriculum.length > 0) {
@@ -398,7 +398,7 @@ export default function EditCourse() {
                           placeholder="10:00"
                           className="w-24 px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm font-mono focus:ring-2 focus:ring-emerald-500/10"
                         />
-                        
+
                         {/* Edit Content Button */}
                         <button
                           type="button"
@@ -541,7 +541,7 @@ export default function EditCourse() {
 
           <button
             type="submit" disabled={saving}
-            className="w-full flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white py-6 rounded-[2.5rem] font-black text-lg transition-all shadow-2xl shadow-emerald-500/30 active:scale-95 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white py-6 rounded-[1.5rem] md:rounded-[2.5rem] font-black text-lg transition-all shadow-2xl shadow-emerald-500/30 active:scale-95 disabled:opacity-50"
           >
             {saving ? (
               <><span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Updating...</>
@@ -776,7 +776,7 @@ export default function EditCourse() {
                           )}
                         </div>
                       ))}
-                      
+
                       {(curriculum[contentModal.sIdx].lessons[contentModal.lIdx].contentBlocks || []).length === 0 && (
                         <div className="py-20 rounded-[3rem] border-2 border-dashed border-black/5 dark:border-white/5 flex flex-col items-center justify-center text-center opacity-30">
                           <Layout className="w-12 h-12 mb-4" />
@@ -980,25 +980,25 @@ export default function EditCourse() {
 
             {/* Modal Footer */}
             <div className="px-10 py-6 border-t border-black/5 dark:border-white/5 flex items-center justify-end bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
-                <button
-                  type="button"
-                  onClick={saveLessonProgress}
-                  disabled={savingLesson}
-                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all flex items-center gap-2"
-                >
-                  {savingLesson ? (
-                    <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Saving...</>
-                  ) : (
-                    <><Save className="w-4 h-4" /> Save Lesson Progress</>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={closeContentModal}
-                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all"
-                >
-                  Done Editing Content
-                </button>
+              <button
+                type="button"
+                onClick={saveLessonProgress}
+                disabled={savingLesson}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all flex items-center gap-2"
+              >
+                {savingLesson ? (
+                  <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Saving...</>
+                ) : (
+                  <><Save className="w-4 h-4" /> Save Lesson Progress</>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={closeContentModal}
+                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all"
+              >
+                Done Editing Content
+              </button>
             </div>
           </div>
         </div>

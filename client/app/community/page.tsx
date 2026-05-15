@@ -25,11 +25,11 @@ export default function CommunityPage() {
         return;
       }
       const parsed = JSON.parse(storedUser);
-      
+
       const res = await fetch(`${API_BASE_URL}/api/auth/profile/${parsed.id}`);
       if (!res.ok) throw new Error("Failed profile fetch");
       const data = await res.json();
-      
+
       if (data.enrolledBatches && data.enrolledBatches.length > 0) {
         setIsEnrolled(true);
         setEnrolledBatches(data.enrolledBatches);
@@ -68,9 +68,9 @@ export default function CommunityPage() {
             onClick={() => setActiveMode('global')}
             role="button"
             tabIndex={0}
-            className={`group relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-left transition-all duration-500 border cursor-pointer overflow-hidden ${activeMode === 'global'
-                ? 'bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-2xl shadow-emerald-500/10'
-                : 'bg-slate-900/40 border-white/5 hover:border-white/10'
+            className={`group relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[1.5rem] md:rounded-[2.5rem] text-left transition-all duration-500 border cursor-pointer overflow-hidden ${activeMode === 'global'
+              ? 'bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20 shadow-2xl shadow-emerald-500/10'
+              : 'bg-slate-900/40 border-white/5 hover:border-white/10'
               }`}
           >
             <div className="relative z-10">
@@ -87,9 +87,9 @@ export default function CommunityPage() {
             onClick={() => setActiveMode('batch')}
             role="button"
             tabIndex={0}
-            className={`group relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-left transition-all duration-500 border cursor-pointer overflow-hidden ${activeMode === 'batch'
-                ? 'bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/20 shadow-2xl shadow-blue-500/10'
-                : 'bg-slate-900/40 border-white/5 hover:border-white/10'
+            className={`group relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[1.5rem] md:rounded-[2.5rem] text-left transition-all duration-500 border cursor-pointer overflow-hidden ${activeMode === 'batch'
+              ? 'bg-blue-500/10 border-blue-500/30 ring-1 ring-blue-500/20 shadow-2xl shadow-blue-500/10'
+              : 'bg-slate-900/40 border-white/5 hover:border-white/10'
               }`}
           >
             <div className="relative z-10">
@@ -130,14 +130,14 @@ export default function CommunityPage() {
               </button>
             </div>
           ) : userBatchId ? (
-            <BatchWarRoom batchId={userBatchId} />
+            <BatchWarRoom batchId={userBatchId} onExit={() => setUserBatchId(undefined)} />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in zoom-in-95 duration-700">
               {enrolledBatches.map((batch) => (
                 <button
                   key={batch._id}
                   onClick={() => setUserBatchId(batch._id)}
-                  className="group p-8 rounded-[2.5rem] bg-slate-900/40 border border-white/5 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all text-left relative overflow-hidden"
+                  className="group p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-900/40 border border-white/5 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all text-left relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-colors" />
                   <div className="relative z-10">

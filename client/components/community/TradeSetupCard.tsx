@@ -30,16 +30,16 @@ export function TradeSetupCard({
   userRole
 }: TradeSetupCardProps) {
   return (
-    <div className="group relative bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-emerald-500/50 transition-all duration-500 shadow-2xl flex flex-col h-full">
+    <div className="group relative bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden hover:border-emerald-500/50 transition-all duration-500 shadow-2xl flex flex-col h-full">
       {/* Chart Image Container */}
       <div className="relative h-56 w-full overflow-hidden shrink-0">
-        <img 
-          src={chartUrl} 
-          alt="Trade Analysis" 
+        <img
+          src={chartUrl}
+          alt="Trade Analysis"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent opacity-80" />
-        
+
         {/* Badges */}
         <div className="absolute top-6 left-6 flex flex-col gap-2">
           {isTrending && (
@@ -68,16 +68,15 @@ export function TradeSetupCard({
 
         <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 onUpvote?.();
               }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all ${
-                isUpvoted 
-                ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' 
-                : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all ${isUpvoted
+                  ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
+                  : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
+                }`}
             >
               <ThumbsUp className={`w-4 h-4 ${isUpvoted ? 'fill-emerald-400' : ''}`} />
               <span className="text-xs font-black">{userRole === 'trainer' ? (isVerified ? 'Toggle Unverify' : 'Verify & Upvote') : upvotes}</span>
@@ -87,7 +86,7 @@ export function TradeSetupCard({
               <span className="text-xs font-bold">{comments}</span>
             </div>
           </div>
-          
+
           <button className="text-[10px] font-black text-white/30 hover:text-white transition-colors tracking-widest uppercase py-2">
             Details
           </button>

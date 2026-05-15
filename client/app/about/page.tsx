@@ -53,7 +53,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {STATS.map((stat, idx) => (
-              <div key={idx} className="p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 group hover:border-emerald-500/20 transition-all">
+              <div key={idx} className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 group hover:border-emerald-500/20 transition-all">
                 <div className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-all group-hover:scale-110",
                   stat.color === 'emerald' && "bg-emerald-500/10 text-emerald-500",

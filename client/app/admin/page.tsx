@@ -41,12 +41,12 @@ const COURSE_COLORS = [
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stat[]>([]);
   const [topCourses, setTopCourses] = useState<TopCourse[]>([]);
-  const [revenueData, setRevenueData] = useState<{ 
-    date: string; 
-    amount: number; 
-    min: number; 
-    max: number; 
-    courses: { name: string; amount: number; batchBreakdown?: string }[] 
+  const [revenueData, setRevenueData] = useState<{
+    date: string;
+    amount: number;
+    min: number;
+    max: number;
+    courses: { name: string; amount: number; batchBreakdown?: string }[]
   }[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [batchSummary, setBatchSummary] = useState<any[]>([]);
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
         {stats.map((stat) => {
           const config = getStatConfig(stat.name);
           return (
-            <div key={stat.name} className="group p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-emerald-500/5 relative overflow-hidden">
+            <div key={stat.name} className="group p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 transition-all hover:shadow-2xl hover:shadow-emerald-500/5 relative overflow-hidden">
               <div className="flex items-center justify-between mb-6">
                 <div className={cn("p-4 rounded-2xl transition-transform group-hover:scale-110 duration-500", config.bg)}>
                   <config.icon className={cn("w-7 h-7", config.color)} />
@@ -140,8 +140,8 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 p-10 rounded-[3rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-10">
+        <div className="lg:col-span-2 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 relative overflow-hidden group">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-10 gap-4">
             <div>
               <h2 className="text-xl font-black text-slate-900 dark:text-white">Revenue Intelligence</h2>
               <p className="text-xs text-slate-500 mt-1 font-medium">Daily course distribution and potential.</p>
@@ -149,28 +149,28 @@ export default function AdminDashboard() {
             <select
               value={period}
               onChange={(e) => setPeriod(Number(e.target.value))}
-              className="bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-5 py-2.5 text-xs font-black uppercase tracking-widest outline-none ring-4 ring-transparent focus:ring-emerald-500/10 transition-all cursor-pointer"
+              className="w-full sm:w-auto bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-5 py-2.5 text-xs font-black uppercase tracking-widest outline-none ring-4 ring-transparent focus:ring-emerald-500/10 transition-all cursor-pointer"
             >
               <option value={7}>Last 7 Days</option>
               <option value={30}>Last 30 Days</option>
             </select>
           </div>
 
-          <div className="h-80 relative flex gap-4">
-            <div className="flex flex-col justify-between text-[8px] font-black text-slate-400 py-10 uppercase tracking-tighter w-12 border-r border-black/5 dark:border-white/5 pr-2">
+          <div className="h-64 sm:h-80 relative flex gap-2 sm:gap-4 overflow-hidden">
+            <div className="flex flex-col justify-between text-[7px] sm:text-[8px] font-black text-slate-400 py-6 sm:py-10 uppercase tracking-tighter w-10 sm:w-12 border-r border-black/5 dark:border-white/5 pr-2 shrink-0">
               {[...Array(5)].map((_, i) => (
                 <span key={i}>${Math.round((periodMax * (4 - i)) / 4).toLocaleString()}</span>
               ))}
             </div>
 
-            <div className="flex-1 flex flex-col h-full overflow-x-auto scrollbar-hide">
-              <div className="flex-1 flex items-end gap-3 justify-between min-w-[600px] p-6 pt-10">
+            <div className="flex-1 flex flex-col h-full overflow-x-auto no-scrollbar scroll-smooth">
+              <div className="flex-1 flex items-end gap-2 sm:gap-3 justify-between min-w-[500px] sm:min-w-[600px] p-4 sm:p-6 pt-10">
                 {currentVisibleData.map((day, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-3 group/bar h-full justify-end relative">
                     <div className="w-full h-full relative flex flex-col justify-end items-center">
-                      <div 
-                        className="w-full flex flex-col-reverse rounded-t-lg overflow-hidden transition-all relative z-10 bg-slate-100 dark:bg-slate-800/30" 
-                        style={{ 
+                      <div
+                        className="w-full flex flex-col-reverse rounded-t-lg overflow-hidden transition-all relative z-10 bg-slate-100 dark:bg-slate-800/30"
+                        style={{
                           height: day.amount > 0 ? `${(day.amount / periodMax) * 100}%` : '4px',
                           minHeight: '4px'
                         }}
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
                           const segmentHeight = (course.amount / day.amount) * 100;
                           const colorClass = COURSE_COLORS[cIdx % COURSE_COLORS.length];
                           return (
-                            <div 
+                            <div
                               key={cIdx}
                               className={cn("w-full transition-all group-hover/bar:brightness-110 flex items-center justify-center overflow-hidden", colorClass)}
                               style={{ height: `${segmentHeight}%` }}
@@ -218,7 +218,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-center gap-1">
                       <span className="text-[7px] font-black uppercase tracking-widest text-slate-400 group-hover/bar:text-emerald-500 transition-colors">
                         {new Date(day.date).getDate()}
@@ -228,7 +228,7 @@ export default function AdminDashboard() {
                         const prevDate = new Date(day.date);
                         prevDate.setDate(prevDate.getDate() - 1);
                         const prevMonth = prevDate.toLocaleString('default', { month: 'short' });
-                        
+
                         if (i === 0 || currentMonth !== prevMonth) {
                           return (
                             <div className={cn(
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
-            
+
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
               {batchSummary.map((b: any, idx: number) => (
                 <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 px-4 py-1.5 rounded-xl border border-black/5 dark:border-white/5 flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 h-1/2">
+          <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 h-1/2">
             <h2 className="text-lg font-black text-slate-900 dark:text-white mb-6">Top Performing</h2>
             <div className="space-y-4">
               {topCourses.map((course, idx) => (
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 h-1/2 overflow-hidden">
+          <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 h-1/2 overflow-hidden">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-black text-slate-900 dark:text-white">Live Enrollment</h2>
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -310,23 +310,23 @@ export default function AdminDashboard() {
       </div>
 
       {/* Growth Insights Card */}
-      <div className="mt-8 p-12 rounded-[3.5rem] bg-emerald-600 text-white relative overflow-hidden group flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="mt-8 p-8 sm:p-12 rounded-[2rem] sm:rounded-[3.5rem] bg-emerald-600 text-white relative overflow-hidden group flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-700">
           <TrendingUp className="w-64 h-64" />
         </div>
-        <div className="relative z-10 space-y-4 max-w-2xl">
+        <div className="relative z-10 space-y-4 max-w-2xl text-center md:text-left">
           <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-md border border-white/10">
             <ArrowUpRight className="w-4 h-4 text-white" />
             <span className="text-[10px] font-black uppercase tracking-widest">Growth Analytics</span>
           </div>
-          <h3 className="text-3xl font-black tracking-tight leading-tight">Your revenue has increased by <span className="text-white underline decoration-4 decoration-emerald-400 underline-offset-8">12%</span> this week.</h3>
-          <p className="text-emerald-100 text-sm font-medium leading-relaxed">
+          <h3 className="text-xl sm:text-3xl font-black tracking-tight leading-tight">Your revenue has increased by <span className="text-white underline decoration-4 decoration-emerald-400 underline-offset-8">12%</span> this week.</h3>
+          <p className="text-emerald-100 text-xs sm:text-sm font-medium leading-relaxed">
             Current performance metrics show a strong upward trend in Masterclass enrollments. Focus on high-retention topics to maintain this momentum.
           </p>
         </div>
-        <div className="relative z-10 shrink-0">
-          <button className="bg-white text-emerald-600 px-10 py-5 rounded-[2rem] font-black text-sm hover:scale-105 transition-all active:scale-95 shadow-2xl shadow-black/20 flex items-center gap-3">
-            Generate Detailed Report <ArrowRight className="w-4 h-4" />
+        <div className="relative z-10 shrink-0 w-full md:w-auto">
+          <button className="w-full md:w-auto bg-white text-emerald-600 px-8 sm:px-10 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] font-black text-xs sm:text-sm hover:scale-105 transition-all active:scale-95 shadow-2xl shadow-black/20 flex items-center justify-center gap-3">
+            Generate Report <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>

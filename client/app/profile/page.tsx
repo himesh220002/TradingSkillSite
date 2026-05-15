@@ -174,42 +174,42 @@ export default function ProfilePage() {
           <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-black/5 shadow-sm space-y-8 relative overflow-hidden">
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -ml-32 -mb-32" />
             <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
-               <BookOpen className="w-7 h-7 text-emerald-500" /> Academic Progress
+              <BookOpen className="w-7 h-7 text-emerald-500" /> Academic Progress
             </h3>
 
             <div className="space-y-6 relative z-10">
               {profile.enrolledBatches.map((batch) => (
-                <div key={batch._id} className="group p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/30 border border-transparent hover:border-emerald-500/20 transition-all shadow-sm space-y-6">
-                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span className={cn(
-                            "px-3 py-1.5 rounded-lg text-[7px] font-black uppercase tracking-[0.15em] shadow-md",
-                            batch.status === 'Ongoing' ? "bg-emerald-500 text-white" : "bg-blue-500 text-white"
-                          )}>{batch.status}</span>
-                          <h4 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{batch.courseId?.title}</h4>
-                        </div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{batch.batchName} • {new Date(batch.startDate) > new Date() ? 'Starting' : 'Started'} {new Date(batch.startDate).toLocaleDateString()}</p>
+                <div key={batch._id} className="group p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 dark:bg-slate-800/30 border border-transparent hover:border-emerald-500/20 transition-all shadow-sm space-y-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className={cn(
+                          "px-3 py-1.5 rounded-lg text-[7px] font-black uppercase tracking-[0.15em] shadow-md",
+                          batch.status === 'Ongoing' ? "bg-emerald-500 text-white" : "bg-blue-500 text-white"
+                        )}>{batch.status}</span>
+                        <h4 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{batch.courseId?.title}</h4>
                       </div>
-                      {batch.meetingLink && (
-                        <a href={batch.meetingLink} target="_blank" className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-[1.2rem] text-[9px] font-black uppercase tracking-widest transition-all shadow-lg hover:bg-emerald-500">Join Live <ExternalLink className="w-3.5 h-3.5" /></a>
-                      )}
-                   </div>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{batch.batchName} • {new Date(batch.startDate) > new Date() ? 'Starting' : 'Started'} {new Date(batch.startDate).toLocaleDateString()}</p>
+                    </div>
+                    {batch.meetingLink && (
+                      <a href={batch.meetingLink} target="_blank" className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-[1.2rem] text-[9px] font-black uppercase tracking-widest transition-all shadow-lg hover:bg-emerald-500">Join Live <ExternalLink className="w-3.5 h-3.5" /></a>
+                    )}
+                  </div>
 
-                   <div className="space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Curriculum Mastery</span>
-                        <span className="text-xl font-black text-slate-900 dark:text-white">{batch.progressPercentage}%</span>
-                      </div>
-                      <div className="h-3 w-full bg-white dark:bg-slate-900 rounded-full overflow-hidden p-1 shadow-inner">
-                        <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${batch.progressPercentage}%` }} />
-                      </div>
-                   </div>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Curriculum Mastery</span>
+                      <span className="text-xl font-black text-slate-900 dark:text-white">{batch.progressPercentage}%</span>
+                    </div>
+                    <div className="h-3 w-full bg-white dark:bg-slate-900 rounded-full overflow-hidden p-1 shadow-inner">
+                      <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${batch.progressPercentage}%` }} />
+                    </div>
+                  </div>
 
-                   <div className="pt-6 border-t border-black/5 flex items-center justify-between">
-                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> Active Track</div>
-                      <Link href={`/course/${batch.courseId?._id}/${batch._id}`} className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5 hover:gap-3 transition-all">Go to Classroom <ChevronRight className="w-3.5 h-3.5" /></Link>
-                   </div>
+                  <div className="pt-6 border-t border-black/5 flex items-center justify-between">
+                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> Active Track</div>
+                    <Link href={`/course/${batch.courseId?._id}/${batch._id}`} className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5 hover:gap-3 transition-all">Go to Classroom <ChevronRight className="w-3.5 h-3.5" /></Link>
+                  </div>
                 </div>
               ))}
             </div>

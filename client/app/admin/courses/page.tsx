@@ -62,14 +62,14 @@ export default function AdminCourses() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-2 sm:space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Courses Management</h1>
           <p className="text-slate-500 dark:text-slate-400">Manage, edit, and track all your educational content.</p>
         </div>
-        <Link 
-          href="/admin/courses/new" 
+        <Link
+          href="/admin/courses/new"
           className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-emerald-500/20"
         >
           <Plus className="w-4 h-4" />
@@ -81,9 +81,9 @@ export default function AdminCourses() {
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-3xl border border-black/5 dark:border-white/5">
         <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-2xl w-full md:w-80 border border-black/5 dark:border-white/5">
           <Search className="w-4 h-4 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Search courses..." 
+          <input
+            type="text"
+            placeholder="Search courses..."
             className="bg-transparent border-none outline-none text-sm w-full"
           />
         </div>
@@ -96,7 +96,7 @@ export default function AdminCourses() {
       </div>
 
       {/* Course List Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-black/5 dark:border-white/5 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] md:rounded-[2.5rem] border border-black/5 dark:border-white/5 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
@@ -145,7 +145,7 @@ export default function AdminCourses() {
                       <Link href={`/admin/courses/${course._id}`} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors">
                         <Edit2 className="w-4 h-4" />
                       </Link>
-                      <button 
+                      <button
                         onClick={() => deleteCourse(course._id)}
                         className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                       >

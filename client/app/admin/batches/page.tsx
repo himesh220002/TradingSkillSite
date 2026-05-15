@@ -92,8 +92,8 @@ export default function AdminBatches() {
   };
 
   return (
-    <div className="space-y-8 p-8 max-w-[1600px] mx-auto">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 p-0 sm:p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-4 sm:flex-row items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Batch <span className="text-emerald-500">Command Center</span></h1>
           <p className="text-slate-500 dark:text-slate-400 font-medium">Manage institutional scaling, student capacity, and curriculum progression.</p>
@@ -108,7 +108,7 @@ export default function AdminBatches() {
       </div>
 
       {/* Batches Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-black/5 dark:border-white/5 overflow-hidden shadow-2xl shadow-black/5">
+      <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] md:rounded-[2.5rem] border border-black/5 dark:border-white/5 overflow-hidden shadow-2xl shadow-black/5">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

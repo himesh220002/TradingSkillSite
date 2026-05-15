@@ -203,9 +203,14 @@ export function Navbar() {
                 </button>
               </>
             ) : (
-              <Link href="/portal" className="w-full px-6 py-5 rounded-2xl bg-emerald-600 text-white text-sm font-black uppercase tracking-widest text-center shadow-xl shadow-emerald-500/20">
-                Get Started
-              </Link>
+              <div className="flex flex-col gap-3">
+                <Link href="/portal" className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 text-sm font-black uppercase tracking-widest text-center">
+                  Log in
+                </Link>
+                <Link href="/portal" className="w-full px-6 py-5 rounded-2xl bg-emerald-600 text-white text-sm font-black uppercase tracking-widest text-center shadow-xl shadow-emerald-500/20">
+                  Get Started
+                </Link>
+              </div>
             )}
             <div className="flex justify-center pt-2">
               <ThemeToggle />

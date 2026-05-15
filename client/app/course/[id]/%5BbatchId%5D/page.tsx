@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '@/lib/api-config';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  Play, 
-  FileText, 
-  Link as LinkIcon, 
-  MessageSquare, 
-  CheckCircle2, 
-  Clock, 
-  ChevronRight, 
+import {
+  Play,
+  FileText,
+  Link as LinkIcon,
+  MessageSquare,
+  CheckCircle2,
+  Clock,
+  ChevronRight,
   ChevronDown,
   Layout,
   Video,
@@ -46,13 +46,13 @@ export default function BatchClassroom() {
         fetch(`${API_BASE_URL}/api/courses/${courseId}`),
         fetch(`${API_BASE_URL}/api/batches/${batchId}`)
       ]);
-      
+
       const courseData = await courseRes.json();
       const batchData = await batchRes.json();
-      
+
       setCourse(courseData);
       setBatch(batchData);
-      
+
       // Set default lesson
       if (courseData.curriculum?.[0]?.lessons?.[0]) {
         setSelectedLesson(courseData.curriculum[0].lessons[0]);
@@ -87,7 +87,7 @@ export default function BatchClassroom() {
                 {section.lessons.map((lesson: any, lIndex: number) => {
                   const isActive = selectedLesson?.title === lesson.title;
                   return (
-                    <button 
+                    <button
                       key={lIndex}
                       onClick={() => {
                         setSelectedLesson(lesson);
@@ -95,8 +95,8 @@ export default function BatchClassroom() {
                       }}
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all group",
-                        isActive 
-                          ? "bg-emerald-500/10 text-emerald-500" 
+                        isActive
+                          ? "bg-emerald-500/10 text-emerald-500"
                           : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50"
                       )}
                     >
@@ -123,7 +123,7 @@ export default function BatchClassroom() {
               <span>{batch.progressPercentage}%</span>
             </div>
             <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                 style={{ width: `${batch.progressPercentage}%` }}
               />
@@ -143,7 +143,7 @@ export default function BatchClassroom() {
               { id: 'resources', label: 'Resources', icon: Download },
               { id: 'discussion', label: 'Community', icon: MessageSquare }
             ].map((tab: any) => (
-              <button 
+              <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
@@ -168,7 +168,7 @@ export default function BatchClassroom() {
         <div className="flex-grow overflow-y-auto p-8 lg:p-12">
           {activeTab === 'video' && (
             <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="aspect-video bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl border border-black/10 flex items-center justify-center relative group">
+              <div className="aspect-video bg-slate-900 rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl border border-black/10 flex items-center justify-center relative group">
                 <div className="text-center space-y-4">
                   <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30 group-hover:scale-110 transition-all">
                     <Play className="w-8 h-8 text-emerald-500 fill-current" />
@@ -195,7 +195,7 @@ export default function BatchClassroom() {
                     <CheckCircle2 className="w-4 h-4" /> Mark as Complete
                   </button>
                 </div>
-                <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 shadow-sm space-y-4">
+                <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 shadow-sm space-y-4">
                   <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Info className="w-5 h-5 text-emerald-500" /> Lesson Highlights
                   </h4>

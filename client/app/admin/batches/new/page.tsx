@@ -88,7 +88,7 @@ export default function NewBatch() {
 
       <form onSubmit={handleSubmit} className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
-          <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-6">
+          <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-6">
             <div className="grid sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Select Course</label>
@@ -168,7 +168,7 @@ export default function NewBatch() {
         </div>
 
         <div className="space-y-6">
-          <div className="p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-6">
+          <div className="p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 dark:text-slate-300 text-xs flex items-center gap-2"><Users className="w-3 h-3" /> Seat Capacity (Max Students)</label>
               <input
