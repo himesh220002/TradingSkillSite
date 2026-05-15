@@ -83,9 +83,9 @@ export default function Home() {
     fetch(`${API_BASE_URL}/api/stats/overview`)
       .then(res => res.json())
       .then(data => {
-        const studentStat = data.stats.find((s: any) => s.name === 'Total Students');
-        const completionStat = data.stats.find((s: any) => s.name === 'Completion Rate');
-        const revenueStat = data.stats.find((s: any) => s.name === 'Total Revenue');
+        const studentStat = data.stats.find((s: { name: string; value: string }) => s.name === 'Total Students');
+        const completionStat = data.stats.find((s: { name: string; value: string }) => s.name === 'Completion Rate');
+        const revenueStat = data.stats.find((s: { name: string; value: string }) => s.name === 'Total Revenue');
 
         const sVal = parseInt(studentStat?.value.replace(/,/g, '') || '0');
         const cVal = parseInt(completionStat?.value.replace('%', '') || '0');
@@ -134,7 +134,7 @@ export default function Home() {
             </h1>
 
             <p className="max-w-xl text-lg md:text-xl text-slate-400 mb-12 leading-relaxed font-medium">
-              Don't just trade. Understand the math, the psychology, and the strategy behind every move. Our 3-month immersive program turns beginners into disciplined professionals.
+              Don&apos;t just trade. Understand the math, the psychology, and the strategy behind every move. Our 3-month immersive program turns beginners into disciplined professionals.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -249,7 +249,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 items-center justify-center">
             <div className="space-y-6">
               <h3 className="text-3xl font-black text-slate-900 dark:text-white leading-tight">Engineered for <br /><span className="text-emerald-500">Accelerated Learning.</span></h3>
-              <p className="text-slate-500 font-medium">We've combined decades of trading experience with modern educational technology to create a platform that actually works.</p>
+              <p className="text-slate-500 font-medium">We&apos;ve combined decades of trading experience with modern educational technology to create a platform that actually works.</p>
               <div className="pt-4">
                 <Link href="/course" className="text-emerald-500 font-black text-sm uppercase tracking-widest flex items-center gap-2 hover:gap-4 transition-all">
                   Explore Our Syllabus <ArrowRight className="w-4 h-4" />

@@ -91,13 +91,13 @@ export default function AboutPage() {
             <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">A Journey from <br /><span className="text-emerald-500">Confusion to Clarity.</span></h2>
             <div className="space-y-6 text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
               <p>
-                Trading wasn't always easy for me. Like many, I started with a laptop and a lot of misconceptions. I spent years navigating the "noise" of the markets, losing capital, and questioning if professional trading was even possible for retail individuals.
+                Trading wasn&apos;t always easy for me. Like many, I started with a laptop and a lot of misconceptions. I spent years navigating the &quot;noise&quot; of the markets, losing capital, and questioning if professional trading was even possible for retail individuals.
               </p>
               <p>
-                Everything changed when I stopped looking for "holy grail" indicators and started focusing on Order Flow, Psychology, and Risk Mathematics.
+                Everything changed when I stopped looking for &quot;holy grail&quot; indicators and started focusing on Order Flow, Psychology, and Risk Mathematics.
               </p>
               <p>
-                Today, my mission is to save you the years of struggle I went through. We've distilled a decade of experience into a structured 3-month roadmap that works for the modern Indian market.
+                Today, my mission is to save you the years of struggle I went through. We&apos;ve distilled a decade of experience into a structured 3-month roadmap that works for the modern Indian market.
               </p>
             </div>
             <div className="pt-4 flex flex-wrap gap-4">

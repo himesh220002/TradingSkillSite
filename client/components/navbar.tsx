@@ -20,7 +20,7 @@ const NAV_LINKS = [
 export function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = React.useState(false);
-  const [user, setUser] = React.useState<any>(null);
+  const [user, setUser] = React.useState<{ username: string; id?: string } | null>(null);
   const [hasEnrolledBatches, setHasEnrolledBatches] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 

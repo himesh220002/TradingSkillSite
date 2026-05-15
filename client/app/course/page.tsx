@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { BarChart3, GraduationCap, Users, Clock, Star, ArrowRight, CheckCircle2 } from "lucide-react";
 
+import { API_BASE_URL } from '@/lib/api-config';
+
 // Mock data for fallback
 const MOCK_COURSES = [
   {
@@ -40,12 +42,12 @@ export default function CoursePage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/courses');
+        const response = await fetch(`${API_BASE_URL}/api/courses`);
         const data = await response.json();
         
         if (data && data.length > 0) {
           // Map DB structure to UI structure if needed
-          const dbCourses = data.map((c: any) => ({
+          const dbCourses = data.map((c: { _id: string; title: string; description: string; price: number; discountPrice?: number; duration?: string; level?: string; enrolledStudents?: number; image?: string }) => ({
             id: c._id,
             title: c.title,
             description: c.description,
@@ -173,7 +175,7 @@ export default function CoursePage() {
             <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl font-bold mb-6 leading-tight">Everything you need to <br />become a master trader</h2>
-                <p className="text-emerald-100 mb-8 max-w-md">Our course isn't just about watching videos. It is about a complete ecosystem designed for success.</p>
+                <p className="text-emerald-100 mb-8 max-w-md">Our course isn&apos;t just about watching videos. It is about a complete ecosystem designed for success.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {['Live Batches', 'Video Notes', 'Issue Tracking', 'Portfolio Review', 'Doubt Support', 'Alumni Network'].map((item) => (
                     <div key={item} className="flex items-center gap-2 text-sm">

@@ -174,7 +174,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tight">Message Sent!</h4>
-                      <p className="text-slate-500 font-medium">Thank you for reaching out. We'll get back to you shortly.</p>
+                      <p className="text-slate-500 font-medium">Thank you for reaching out. We&apos;ll get back to you shortly.</p>
                     </div>
                     <button 
                       onClick={() => setStatus('idle')}

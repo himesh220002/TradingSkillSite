@@ -25,7 +25,7 @@ export default function TradingChart({ type, caption }: TradingChartProps) {
     if (!ctx) return;
 
     let data: any = { labels: [], datasets: [] };
-    let options: any = {
+    const options: any = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {

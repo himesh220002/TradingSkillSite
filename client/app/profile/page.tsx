@@ -208,7 +208,7 @@ export default function ProfilePage() {
 
                    <div className="pt-6 border-t border-black/5 flex items-center justify-between">
                       <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> Active Track</div>
-                      <Link href={`/course/${(batch.courseId as any)?._id}/${batch._id}`} className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5 hover:gap-3 transition-all">Go to Classroom <ChevronRight className="w-3.5 h-3.5" /></Link>
+                      <Link href={`/course/${batch.courseId?._id}/${batch._id}`} className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5 hover:gap-3 transition-all">Go to Classroom <ChevronRight className="w-3.5 h-3.5" /></Link>
                    </div>
                 </div>
               ))}
