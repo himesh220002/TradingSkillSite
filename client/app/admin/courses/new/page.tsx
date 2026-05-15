@@ -1,527 +1,314 @@
 "use client"
 
 import React, { useState } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Save,
-  X,
   Plus,
   Trash2,
-  BookOpen,
+  CheckCircle2,
+  AlertCircle,
   Video,
-  DollarSign,
-  HelpCircle,
-  Layout,
-  PlusCircle,
-  PlayCircle,
   FileText,
-  Lightbulb,
-  Link as LinkIcon,
-  MessageCircle,
-  TrendingUp,
+  Clock,
+  Layout,
+  Layers,
+  GraduationCap
 } from "lucide-react";
-import Link from 'next/link';
-
-type Resource = { title: string; url: string; type: string };
-type LessonFAQ = { question: string; answer: string };
-type Lesson = {
-  title: string;
-  duration: string;
-  notes: string;
-  videoUrl: string;
-  liveClassUrl: string;
-  methods: string;
-  practiceQuestions: string[];
-  resources: Resource[];
-  faqs: LessonFAQ[];
-};
-type Section = { title: string; lessons: Lesson[] };
-type CourseFAQ = { question: string; answer: string };
 
 export default function NewCourse() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
 
-  const [curriculum, setCurriculum] = useState<Section[]>([
-    { title: 'Introduction', lessons: [createEmptyLesson('Welcome to the course', '5:00')] }
-  ]);
-  const [faqs, setFaqs] = useState<CourseFAQ[]>([{ question: '', answer: '' }]);
-
-  const [formData, setFormData] = useState({
+  const [courseData, setCourseData] = useState({
     title: '',
-    subtitle: '',
     description: '',
-    bannerImage: '',
-    videoPreviewUrl: '',
     price: '',
     discountPrice: '',
-    currency: 'USD',
-    duration: '3 Months',
     level: 'Beginner',
-    category: 'Trading',
-    instructor: 'Krishna Sharma'
+    duration: '',
+    image: '',
+    curriculum: [
+      {
+        sectionTitle: 'Introduction',
+        lessons: [{ title: 'Welcome to the Course', type: 'VIDEO', duration: '10 mins' }]
+      }
+    ]
   });
 
-  const [contentModal, setContentModal] = useState<{ sIdx: number; lIdx: number } | null>(null);
-
-  function createEmptyLesson(title = '', duration = ''): Lesson {
-    return {
-      title,
-      duration,
-      notes: '',
-      videoUrl: '',
-      liveClassUrl: '',
-      methods: '',
-      practiceQuestions: [],
-      resources: [],
-      faqs: []
-    };
-  }
-
-  // ── Curriculum helpers ──────────────────────────────────────────────────────
-  const addSection = () =>
-    setCurriculum([...curriculum, { title: '', lessons: [createEmptyLesson()] }]);
-
-  const removeSection = (sIdx: number) =>
-    setCurriculum(curriculum.filter((_, i) => i !== sIdx));
-
-  const updateSectionTitle = (sIdx: number, title: string) => {
-    const c = [...curriculum];
-    c[sIdx] = { ...c[sIdx], title };
-    setCurriculum(c);
+  const addSection = () => {
+    setCourseData({
+      ...courseData,
+      curriculum: [...courseData.curriculum, { sectionTitle: '', lessons: [] }]
+    });
   };
 
-  const addLesson = (sIdx: number) => {
-    const c = [...curriculum];
-    c[sIdx].lessons = [...c[sIdx].lessons, createEmptyLesson()];
-    setCurriculum(c);
+  const addLesson = (sectionIndex: number) => {
+    const newCurriculum = [...courseData.curriculum];
+    newCurriculum[sectionIndex].lessons.push({ title: '', type: 'VIDEO', duration: '' });
+    setCourseData({ ...courseData, curriculum: newCurriculum });
+  };
+
+  const updateSection = (index: number, title: string) => {
+    const newCurriculum = [...courseData.curriculum];
+    newCurriculum[index].sectionTitle = title;
+    setCourseData({ ...courseData, curriculum: newCurriculum });
+  };
+
+  const updateLesson = (sIdx: number, lIdx: number, field: string, value: string) => {
+    const newCurriculum = [...courseData.curriculum];
+    (newCurriculum[sIdx].lessons[lIdx] as any)[field] = value;
+    setCourseData({ ...courseData, curriculum: newCurriculum });
+  };
+
+  const removeSection = (sIdx: number) => {
+    const newCurriculum = courseData.curriculum.filter((_, i) => i !== sIdx);
+    setCourseData({ ...courseData, curriculum: newCurriculum });
   };
 
   const removeLesson = (sIdx: number, lIdx: number) => {
-    const c = [...curriculum];
-    c[sIdx].lessons = c[sIdx].lessons.filter((_, i) => i !== lIdx);
-    setCurriculum(c);
+    const newCurriculum = [...courseData.curriculum];
+    newCurriculum[sIdx].lessons = newCurriculum[sIdx].lessons.filter((_, i) => i !== lIdx);
+    setCourseData({ ...courseData, curriculum: newCurriculum });
   };
 
-  const updateLesson = (sIdx: number, lIdx: number, field: keyof Lesson, val: any) => {
-    const c = [...curriculum];
-    (c[sIdx].lessons[lIdx] as any)[field] = val;
-    setCurriculum(c);
-  };
-
-  // ── Content Modal Helpers ───────────────────────────────────────────────────
-  const openContentModal = (sIdx: number, lIdx: number) => setContentModal({ sIdx, lIdx });
-  const closeContentModal = () => setContentModal(null);
-
-  const updateSelectedLessonContent = (field: keyof Lesson, val: any) => {
-    if (!contentModal) return;
-    updateLesson(contentModal.sIdx, contentModal.lIdx, field, val);
-  };
-
-  // ── FAQ helpers ─────────────────────────────────────────────────────────────
-  const addFaq = () => setFaqs([...faqs, { question: '', answer: '' }]);
-  const removeFaq = (i: number) => setFaqs(faqs.filter((_, idx) => idx !== i));
-  const updateFaq = (i: number, field: keyof CourseFAQ, val: string) => {
-    const f = [...faqs];
-    f[i][field] = val;
-    setFaqs(f);
-  };
-
-  // ── Submit ──────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/courses', {
+      const res = await fetch(`${API_BASE_URL}/api/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          price: Number(formData.price),
-          discountPrice: formData.discountPrice ? Number(formData.discountPrice) : undefined,
-          faqs: faqs.filter(f => f.question.trim() !== ''),
-          curriculum,
-          topics: curriculum.flatMap(s => s.lessons).map((l, i) => ({ name: l.title, order: i + 1 }))
+          ...courseData,
+          price: Number(courseData.price),
+          discountPrice: courseData.discountPrice ? Number(courseData.discountPrice) : undefined
         }),
       });
-      if (res.ok) router.push('/admin/courses');
-      else alert('Error creating course');
-    } catch (err) {
-      console.error(err);
+
+      if (!res.ok) throw new Error('Failed to create course');
+
+      setSuccess(true);
+      setTimeout(() => router.push('/admin/courses'), 2000);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const sectionNum = (i: number) => String(i + 1).padStart(2, '0');
-
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-24">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link
-          href="/admin/courses"
-          className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 text-slate-500 hover:text-emerald-500 transition-all shadow-sm"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">Professional Course Architect</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
-            Design high-converting curriculum and detailed educational programs.
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white dark:bg-slate-950 pt-32 pb-20 px-4 transition-colors">
+      <div className="max-w-4xl mx-auto">
+        <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:hover:text-white mb-8 group transition-all">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-xs font-black uppercase tracking-widest">Back to Courses</span>
+        </button>
 
-      <form onSubmit={handleSubmit} className="grid lg:grid-cols-12 gap-8 items-start">
-        {/* ── Left Column ─────────────────────────────────────── */}
-        <div className="lg:col-span-8 space-y-8">
-
-          {/* General Details */}
-          <div className="p-10 rounded-[3rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-8 shadow-sm">
-            <h3 className="text-xl font-bold flex items-center gap-3">
-              <Layout className="w-6 h-6 text-emerald-500" /> General Details
-            </h3>
-
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Course Main Title</label>
-                <input
-                  type="text" required value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g., Advanced Options Trading Masterclass"
-                  className="w-full px-8 py-5 rounded-[1.5rem] bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all text-lg font-bold"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Subtitle / Tagline</label>
-                <input
-                  type="text" value={formData.subtitle}
-                  onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
-                  placeholder="e.g., Master the art of risk management and leverage."
-                  className="w-full px-8 py-5 rounded-[1.5rem] bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Long Description</label>
-                <textarea
-                  required value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  rows={6}
-                  placeholder="Tell your students exactly what they are getting..."
-                  className="w-full px-8 py-5 rounded-[1.5rem] bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all resize-none"
-                />
-              </div>
-            </div>
+        <div className="flex items-center justify-between mb-12">
+          <div>
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight">Create <span className="text-emerald-500 text-6xl block mt-1">New Course</span></h1>
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em] mt-4">Drafting a new educational track</p>
           </div>
+          <GraduationCap className="w-16 h-16 text-emerald-500/20" />
+        </div>
 
-          {/* Syllabus Architecture */}
-          <div className="p-10 rounded-[3rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-8 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold flex items-center gap-3">
-                <BookOpen className="w-6 h-6 text-emerald-500" /> Syllabus Architecture
-              </h3>
-              <button
-                type="button" onClick={addSection}
-                className="text-sm font-bold text-emerald-500 flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
-              >
-                <PlusCircle className="w-4 h-4" /> Add Topic
-              </button>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-10">
+          {/* Core Info */}
+          <section className="bg-slate-50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 rounded-[3rem] p-10 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -mr-16 -mt-16" />
+             <h2 className="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+               <Layout className="w-4 h-4" /> Core Framework
+             </h2>
 
-            <div className="space-y-6">
-              {curriculum.map((section, sIdx) => (
-                <div key={sIdx} className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-800/50 space-y-5 border border-black/5 dark:border-white/5">
-                  {/* Section Header */}
-                  <div className="flex items-center gap-4">
-                    <span className="w-10 h-10 shrink-0 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-black text-sm">
-                      {sectionNum(sIdx)}
-                    </span>
-                    <input
-                      type="text"
-                      value={section.title}
-                      onChange={e => updateSectionTitle(sIdx, e.target.value)}
-                      placeholder="Topic Title (e.g., Market Fundamentals)"
-                      className="bg-transparent border-none outline-none font-black text-xl flex-grow placeholder:opacity-30"
-                    />
-                    {curriculum.length > 1 && (
-                      <button
-                        type="button" onClick={() => removeSection(sIdx)}
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-all ml-auto"
+             <div className="space-y-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Course Title</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={courseData.title}
+                        onChange={(e) => setCourseData({...courseData, title: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold shadow-sm"
+                        placeholder="e.g. Price Action Mastery"
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Banner Image URL</label>
+                      <input 
+                        type="text" 
+                        value={courseData.image}
+                        onChange={(e) => setCourseData({...courseData, image: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold shadow-sm"
+                        placeholder="https://..."
+                      />
+                   </div>
+                </div>
+
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Course Narrative (Description)</label>
+                   <textarea 
+                     required
+                     value={courseData.description}
+                     onChange={(e) => setCourseData({...courseData, description: e.target.value})}
+                     className="w-full bg-white dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-[2rem] py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold shadow-sm min-h-[120px]"
+                     placeholder="Describe the learning journey..."
+                   />
+                </div>
+
+                <div className="grid md:grid-cols-4 gap-6">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Price ($)</label>
+                      <input 
+                        type="number" 
+                        required
+                        value={courseData.price}
+                        onChange={(e) => setCourseData({...courseData, price: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold shadow-sm"
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Discount ($)</label>
+                      <input 
+                        type="number" 
+                        value={courseData.discountPrice}
+                        onChange={(e) => setCourseData({...courseData, discountPrice: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold shadow-sm"
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Expertise Level</label>
+                      <select 
+                        value={courseData.level}
+                        onChange={(e) => setCourseData({...courseData, level: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold shadow-sm appearance-none cursor-pointer"
                       >
+                        <option>Beginner</option>
+                        <option>Intermediate</option>
+                        <option>Advanced</option>
+                        <option>Pro</option>
+                      </select>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Duration</label>
+                      <input 
+                        type="text" 
+                        value={courseData.duration}
+                        onChange={(e) => setCourseData({...courseData, duration: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold shadow-sm"
+                        placeholder="e.g. 3 Months"
+                      />
+                   </div>
+                </div>
+             </div>
+          </section>
+
+          {/* Curriculum */}
+          <section className="bg-slate-50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 rounded-[3rem] p-10">
+             <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xs font-black text-emerald-500 uppercase tracking-[0.3em] flex items-center gap-3">
+                  <Layers className="w-4 h-4" /> Curriculum Architecture
+                </h2>
+                <button type="button" onClick={addSection} className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">
+                  <Plus className="w-3.5 h-3.5" /> Add Section
+                </button>
+             </div>
+
+             <div className="space-y-8">
+                {courseData.curriculum.map((section, sIdx) => (
+                  <div key={sIdx} className="bg-white dark:bg-slate-950/50 rounded-[2rem] p-8 border border-black/5 dark:border-white/5 shadow-sm">
+                    <div className="flex items-center gap-4 mb-6">
+                      <input 
+                        type="text" 
+                        value={section.sectionTitle}
+                        onChange={(e) => updateSection(sIdx, e.target.value)}
+                        className="flex-grow bg-slate-50 dark:bg-slate-900 border-2 border-transparent focus:border-emerald-500/30 rounded-xl py-3 px-6 text-sm font-black uppercase tracking-widest outline-none transition-all"
+                        placeholder="Section Title"
+                      />
+                      <button type="button" onClick={() => removeSection(sIdx)} className="p-3 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all">
                         <Trash2 className="w-4 h-4" />
                       </button>
-                    )}
+                    </div>
+
+                    <div className="space-y-4 ml-6 pl-6 border-l-2 border-emerald-500/20">
+                       {section.lessons.map((lesson, lIdx) => (
+                         <div key={lIdx} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                            <div className="md:col-span-2 relative">
+                               <input 
+                                 type="text" 
+                                 value={lesson.title}
+                                 onChange={(e) => updateLesson(sIdx, lIdx, 'title', e.target.value)}
+                                 className="w-full bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-emerald-500/20 rounded-xl py-2.5 px-4 text-xs font-bold outline-none"
+                                 placeholder="Lesson Title"
+                               />
+                            </div>
+                            <select 
+                               value={lesson.type}
+                               onChange={(e) => updateLesson(sIdx, lIdx, 'type', e.target.value)}
+                               className="bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-emerald-500/20 rounded-xl py-2.5 px-4 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer"
+                            >
+                               <option value="VIDEO">Video</option>
+                               <option value="PDF">Document</option>
+                               <option value="QUIZ">Quiz</option>
+                            </select>
+                            <div className="flex items-center gap-2">
+                               <input 
+                                 type="text" 
+                                 value={lesson.duration}
+                                 onChange={(e) => updateLesson(sIdx, lIdx, 'duration', e.target.value)}
+                                 className="flex-grow bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-emerald-500/20 rounded-xl py-2.5 px-4 text-xs font-bold outline-none"
+                                 placeholder="10 mins"
+                               />
+                               <button type="button" onClick={() => removeLesson(sIdx, lIdx)} className="p-2 text-slate-400 hover:text-rose-500 transition-all">
+                                 <Trash2 className="w-3.5 h-3.5" />
+                               </button>
+                            </div>
+                         </div>
+                       ))}
+                       <button type="button" onClick={() => addLesson(sIdx)} className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest hover:gap-3 transition-all mt-4">
+                         <Plus className="w-3.5 h-3.5" /> Add Lesson
+                       </button>
+                    </div>
                   </div>
+                ))}
+             </div>
+          </section>
 
-                  {/* Lessons */}
-                  <div className="space-y-3 pl-14">
-                    {section.lessons.map((lesson, lIdx) => (
-                      <div key={lIdx} className="flex gap-3 items-center group">
-                        <PlayCircle className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0" />
-                        <input
-                          type="text"
-                          value={lesson.title}
-                          onChange={e => updateLesson(sIdx, lIdx, 'title', e.target.value)}
-                          placeholder="Subtopic name"
-                          className="flex-grow px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm focus:ring-2 focus:ring-emerald-500/10"
-                        />
-                        <input
-                          type="text"
-                          value={lesson.duration}
-                          onChange={e => updateLesson(sIdx, lIdx, 'duration', e.target.value)}
-                          placeholder="10:00"
-                          className="w-24 px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm font-mono focus:ring-2 focus:ring-emerald-500/10"
-                        />
+          {/* Controls */}
+          <div className="flex flex-col gap-6">
+             {error && (
+               <div className="flex items-center gap-3 p-6 bg-rose-500/10 border border-rose-500/20 rounded-3xl text-rose-500 text-sm font-bold animate-shake">
+                 <AlertCircle className="w-5 h-5" /> {error}
+               </div>
+             )}
 
-                        {/* Edit Content Button */}
-                        <button
-                          type="button"
-                          onClick={() => openContentModal(sIdx, lIdx)}
-                          className="px-3 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
-                        >
-                          Edit Content
-                        </button>
+             {success && (
+               <div className="flex items-center gap-3 p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl text-emerald-500 text-sm font-bold">
+                 <CheckCircle2 className="w-5 h-5" /> Course created! Redirecting to terminal...
+               </div>
+             )}
 
-                        {section.lessons.length > 1 && (
-                          <button
-                            type="button" onClick={() => removeLesson(sIdx, lIdx)}
-                            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    <button
-                      type="button" onClick={() => addLesson(sIdx)}
-                      className="text-[10px] font-black uppercase text-emerald-500 tracking-widest mt-1 hover:underline flex items-center gap-1"
-                    >
-                      <Plus className="w-3 h-3" /> Add Subtopic
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+             <button 
+               type="submit" 
+               disabled={loading || success}
+               className="w-full bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
+             >
+               {loading ? (
+                 <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+               ) : (
+                 <>
+                   <Save className="w-6 h-6" /> Deploy Course Architecture
+                 </>
+               )}
+             </button>
           </div>
-
-          {/* Student FAQs */}
-          <div className="p-10 rounded-[3rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-8 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold flex items-center gap-3">
-                <HelpCircle className="w-6 h-6 text-emerald-500" /> Student FAQs
-              </h3>
-              <button
-                type="button" onClick={addFaq}
-                className="text-sm font-bold text-emerald-500 flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
-              >
-                <PlusCircle className="w-4 h-4" /> Add FAQ
-              </button>
-            </div>
-
-            <div className="space-y-5">
-              {faqs.map((faq, i) => (
-                <div key={i} className="p-6 rounded-[1.5rem] bg-slate-50 dark:bg-slate-800/50 space-y-3 border border-black/5 dark:border-white/5">
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="text" value={faq.question}
-                      onChange={e => updateFaq(i, 'question', e.target.value)}
-                      placeholder="Question"
-                      className="flex-grow px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm font-bold focus:ring-2 focus:ring-emerald-500/10"
-                    />
-                    {faqs.length > 1 && (
-                      <button type="button" onClick={() => removeFaq(i)} className="p-2 text-slate-400 hover:text-red-500 transition-colors mt-0.5">
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                  <textarea
-                    value={faq.answer}
-                    onChange={e => updateFaq(i, 'answer', e.target.value)}
-                    placeholder="Answer"
-                    rows={3}
-                    className="w-full px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border-none outline-none text-sm resize-none focus:ring-2 focus:ring-emerald-500/10"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Right Column ─────────────────────────────────────── */}
-        <div className="lg:col-span-4 space-y-8">
-
-          {/* Course Economics */}
-          <div className="p-8 rounded-[3rem] bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 space-y-6 shadow-xl shadow-emerald-500/10">
-            <h3 className="font-black flex items-center gap-2">
-              <DollarSign className="w-5 h-5" /> Course Economics
-            </h3>
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase opacity-70">Base Price</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold">$</span>
-                  <input
-                    type="number" required min={0} value={formData.price}
-                    onChange={e => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="0"
-                    className="w-full pl-10 pr-6 py-4 rounded-2xl bg-white/10 border border-white/20 outline-none font-bold text-xl placeholder:opacity-40"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase opacity-70">Sale Price (Optional)</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold">$</span>
-                  <input
-                    type="number" min={0} value={formData.discountPrice}
-                    onChange={e => setFormData({ ...formData, discountPrice: e.target.value })}
-                    placeholder="0"
-                    className="w-full pl-10 pr-6 py-4 rounded-2xl bg-white/10 border border-white/20 outline-none font-bold text-xl text-emerald-300 dark:text-emerald-950 placeholder:opacity-40"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Classification */}
-          <div className="p-8 rounded-[3rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-5 shadow-sm">
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400">Duration</label>
-              <select
-                value={formData.duration}
-                onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                className="w-full px-5 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none font-bold text-sm"
-              >
-                <option>1 Month</option>
-                <option>2 Months</option>
-                <option>3 Months</option>
-                <option>6 Months</option>
-                <option>12 Months</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400">Level</label>
-              <select
-                value={formData.level}
-                onChange={e => setFormData({ ...formData, level: e.target.value })}
-                className="w-full px-5 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-none outline-none font-bold text-sm"
-              >
-                <option>Beginner</option>
-                <option>Intermediate</option>
-                <option>Advanced</option>
-              </select>
-            </div>
-          </div>
-
-          <button
-            type="submit" disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white py-6 rounded-[2.5rem] font-black text-lg transition-all shadow-2xl shadow-emerald-500/30 active:scale-95 disabled:opacity-50"
-          >
-            {loading ? (
-              <><span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Publishing...</>
-            ) : (
-              'Live Publish Course'
-            )}
-          </button>
-        </div>
-      </form>
-
-      {/* ── Lesson Content Modal ─────────────────────────────────────────── */}
-      {contentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl border border-black/5 dark:border-white/5 flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-            {/* Modal Header */}
-            <div className="px-10 py-8 border-b border-black/5 dark:border-white/5 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-800/50">
-              <div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-                  Topic: {curriculum[contentModal.sIdx].title}
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white">
-                  {curriculum[contentModal.sIdx].lessons[contentModal.lIdx].title || 'Untitled Lesson'}
-                </h3>
-              </div>
-              <button
-                onClick={closeContentModal}
-                className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 text-slate-400 hover:text-red-500 transition-all shadow-sm"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-10 space-y-10">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <FileText className="w-4 h-4" /> Lesson Notes
-                  </label>
-                  <textarea
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].notes}
-                    onChange={e => updateSelectedLessonContent('notes', e.target.value)}
-                    rows={8}
-                    placeholder="Main teaching points..."
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all resize-none text-sm leading-relaxed"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4" /> Methods / Strategies
-                  </label>
-                  <textarea
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].methods}
-                    onChange={e => updateSelectedLessonContent('methods', e.target.value)}
-                    rows={8}
-                    placeholder="Specific trading setups..."
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all resize-none text-sm leading-relaxed"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <Video className="w-4 h-4" /> Video URL
-                  </label>
-                  <input
-                    type="url"
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].videoUrl}
-                    onChange={e => updateSelectedLessonContent('videoUrl', e.target.value)}
-                    placeholder="YouTube link"
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                    <PlayCircle className="w-4 h-4" /> Live Class URL
-                  </label>
-                  <input
-                    type="url"
-                    value={curriculum[contentModal.sIdx].lessons[contentModal.lIdx].liveClassUrl}
-                    onChange={e => updateSelectedLessonContent('liveClassUrl', e.target.value)}
-                    placeholder="Zoom / Meet link"
-                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-10 py-6 border-t border-black/5 dark:border-white/5 flex items-center justify-end bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
-              <button
-                type="button"
-                onClick={closeContentModal}
-                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl active:scale-95 transition-all"
-              >
-                Save Content
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        </form>
+      </div>
     </div>
   );
 }

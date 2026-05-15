@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { MessageCircle, Trophy, Users, ArrowRight, TrendingUp, Star, Send, CheckCircle2 } from 'lucide-react';
 
 interface ChatMessage {
@@ -29,7 +30,7 @@ export default function GlobalLounge() {
   const [username, setUsername] = useState("Guest");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const API_BASE = "http://localhost:5000/api/community";
+  const API_BASE = `${API_BASE_URL}/api/community`;
 
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');

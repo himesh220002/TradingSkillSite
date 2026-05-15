@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import {
   Users,
   BookOpen,
@@ -55,7 +56,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/stats/overview');
+        const res = await fetch(`${API_BASE_URL}/api/stats/overview`);
         const data = await res.json();
         setStats(data.stats);
         setTopCourses(data.topCourses);

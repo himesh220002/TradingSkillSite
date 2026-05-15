@@ -27,7 +27,7 @@ const updateLesson = async () => {
   };
 
   try {
-    const response = await fetch(`http://localhost:5000/api/courses/${courseId}/lessons/${sectionIndex}/${lessonIndex}`, {
+    const response = await fetch(`${process.env.API_BASE_URL || 'http://localhost:5000'}/api/courses/${courseId}/lessons/${sectionIndex}/${lessonIndex}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(content)

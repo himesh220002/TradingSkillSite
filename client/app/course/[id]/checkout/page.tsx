@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   ShieldCheck, 
@@ -37,7 +38,7 @@ export default function CheckoutPage() {
 
   const fetchCourse = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/courses/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/courses/${id}`);
       const data = await response.json();
       setCourse(data);
     } catch (error) {
@@ -62,7 +63,7 @@ export default function CheckoutPage() {
 
     setProcessing(true);
     try {
-      const response = await fetch('http://localhost:5000/api/batches/auto-enroll', {
+      const response = await fetch(`${API_BASE_URL}/api/batches/auto-enroll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

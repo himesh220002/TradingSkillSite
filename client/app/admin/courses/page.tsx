@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { API_BASE_URL } from '@/lib/api-config';
 import {
   Plus,
   Search,
@@ -40,7 +41,7 @@ export default function AdminCourses() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/courses');
+      const response = await fetch(`${API_BASE_URL}/api/courses`);
       const data = await response.json();
       setCourses(data);
     } catch (error) {
@@ -53,7 +54,7 @@ export default function AdminCourses() {
   const deleteCourse = async (id: string) => {
     if (!confirm('Are you sure you want to delete this course?')) return;
     try {
-      await fetch(`http://localhost:5000/api/courses/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/api/courses/${id}`, { method: 'DELETE' });
       setCourses(courses.filter(c => c._id !== id));
     } catch (error) {
       console.error('Error deleting course:', error);

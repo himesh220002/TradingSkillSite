@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { useParams, useRouter } from 'next/navigation';
 import {
   PlayCircle,
@@ -74,7 +75,7 @@ export default function CourseDetailPage() {
 
   const fetchCourse = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/courses/${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/courses/${id}`);
       const data = await response.json();
       setCourse(data);
     } catch (error) {
@@ -89,7 +90,7 @@ export default function CourseDetailPage() {
     if (userData.id) {
       setIsLoggedIn(true);
       // Fetch user profile to get enrolled batches with populated courseIds
-      fetch(`http://localhost:5000/api/auth/profile/${userData.id}`)
+      fetch(`${API_BASE_URL}/api/auth/profile/${userData.id}`)
         .then(res => res.json())
         .then(data => {
           const batch = data.enrolledBatches?.find((b: any) => b.courseId?._id === id);

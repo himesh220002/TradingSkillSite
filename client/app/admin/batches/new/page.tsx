@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/api-config';
 import {
   ArrowLeft,
   Save,
@@ -38,7 +39,7 @@ export default function NewBatch() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/courses');
+      const response = await fetch(`${API_BASE_URL}/api/courses`);
       const data = await response.json();
       setCourses(data);
       if (data.length > 0) setFormData(prev => ({ ...prev, courseId: data[0]._id }));
@@ -52,7 +53,7 @@ export default function NewBatch() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/batches', {
+      const response = await fetch(`${API_BASE_URL}/api/batches`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

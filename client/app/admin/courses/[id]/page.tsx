@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/api-config';
 import {
   ArrowLeft,
   Save,
@@ -103,7 +104,7 @@ export default function EditCourse() {
 
   const fetchCourse = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/courses/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/courses/${id}`);
       const course = await res.json();
       if (course) {
         setFormData({
@@ -188,7 +189,7 @@ export default function EditCourse() {
     setSavingLesson(true);
     try {
       const lesson = curriculum[contentModal.sIdx].lessons[contentModal.lIdx];
-      const res = await fetch(`http://localhost:5000/api/courses/${id}/lessons/${contentModal.sIdx}/${contentModal.lIdx}`, {
+      const res = await fetch(`${API_BASE_URL}/api/courses/${id}/lessons/${contentModal.sIdx}/${contentModal.lIdx}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(lesson),
@@ -251,7 +252,7 @@ export default function EditCourse() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/courses/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/courses/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

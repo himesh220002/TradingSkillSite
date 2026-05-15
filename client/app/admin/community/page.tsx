@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { MessageSquare, Shield, CheckCircle2, Search, Filter, Send, Clock, Users } from 'lucide-react';
 
 interface CommunityMessage {
@@ -21,7 +22,7 @@ export default function CommunityManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
 
-  const API_BASE = "http://localhost:5000/api/community";
+  const API_BASE = `${API_BASE_URL}/api/community`;
 
   useEffect(() => {
     fetchMessages();

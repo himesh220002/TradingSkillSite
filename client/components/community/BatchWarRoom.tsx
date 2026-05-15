@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { Shield, MessageCircle, BarChart3, Users, Search, Filter, ThumbsUp, CheckCircle, Plus, Send, X } from 'lucide-react';
 import { TradeSetupCard } from './TradeSetupCard';
 
@@ -38,7 +39,7 @@ export default function BatchWarRoom({ batchId: propBatchId }: { batchId?: strin
   const [username, setUsername] = useState("Guest");
   
   const batchId = propBatchId || "69fdbaf789ce51284d91d989"; // Use prop or fallback to a real ID
-  const API_BASE = "http://localhost:5000/api/community";
+  const API_BASE = `${API_BASE_URL}/api/community`;
 
   useEffect(() => {
     const storedUser = localStorage.getItem('userData');

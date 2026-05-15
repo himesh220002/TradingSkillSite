@@ -4,7 +4,7 @@ const fixBatch = async () => {
 
   try {
     // 1. Fetch the course to get the correct hierarchy
-    const courseRes = await fetch(`http://localhost:5000/api/courses/${courseId}`);
+    const courseRes = await fetch(`${process.env.API_BASE_URL || 'http://localhost:5000'}/api/courses/${courseId}`);
     const course = await courseRes.json();
 
     // 2. Map existing subtopics to their parent sections
@@ -21,7 +21,7 @@ const fixBatch = async () => {
     });
 
     // 3. Update the batch with the new hierarchical structure
-    const updateRes = await fetch(`http://localhost:5000/api/batches/${batchId}`, {
+    const updateRes = await fetch(`${process.env.API_BASE_URL || 'http://localhost:5000'}/api/batches/${batchId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ topicProgress: newTopicProgress })

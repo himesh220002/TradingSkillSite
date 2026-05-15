@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import {
   Users,
   Search,
@@ -92,8 +93,8 @@ export default function AdminStudents() {
     setError(null);
     try {
       const [usersRes, batchesRes] = await Promise.all([
-        fetch('http://localhost:5000/api/auth/users'),
-        fetch('http://localhost:5000/api/batches'),
+        fetch(`${API_BASE_URL}/api/auth/users`),
+        fetch(`${API_BASE_URL}/api/batches`),
       ]);
 
       if (!usersRes.ok || !batchesRes.ok) throw new Error("Failed to fetch data");
@@ -123,7 +124,7 @@ export default function AdminStudents() {
     setProfileLoading(true);
     setProfileModal({ open: true, student: null });
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/profile/${userId}`);
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile/${userId}`);
       if (!res.ok) throw new Error("Failed to fetch profile");
       const data = await res.json();
       setProfileModal({ open: true, student: data });
@@ -151,7 +152,7 @@ export default function AdminStudents() {
     setEnrolling(true);
     setEnrollMsg(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/batches/${selectedBatchId}/students`, {
+      const res = await fetch(`${API_BASE_URL}/api/batches/${selectedBatchId}/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: enrollModal.student._id }),

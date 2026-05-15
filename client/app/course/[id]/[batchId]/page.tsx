@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_BASE_URL } from '@/lib/api-config';
 import {
   ArrowLeft, CheckCircle2, Circle, PlayCircle, BookOpen, FileText,
   Lightbulb, HelpCircle, Link as LinkIcon, Video, ExternalLink,
@@ -81,9 +82,9 @@ export default function ClassroomPage() {
       const token = localStorage.getItem('userToken');
 
       const [courseRes, batchRes, progressRes] = await Promise.all([
-        fetch(`http://localhost:5000/api/courses/${courseId}`),
-        fetch(`http://localhost:5000/api/batches/${batchId}`),
-        fetch(`http://localhost:5000/api/student-progress/${batchId}`, {
+        fetch(`${API_BASE_URL}/api/courses/${courseId}`),
+        fetch(`${API_BASE_URL}/api/batches/${batchId}`),
+        fetch(`${API_BASE_URL}/api/student-progress/${batchId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -129,7 +130,7 @@ export default function ClassroomPage() {
     try {
       const token = localStorage.getItem('userToken');
 
-      const res = await fetch(`http://localhost:5000/api/student-progress/${batchId}/topic/${topicId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/student-progress/${batchId}/topic/${topicId}`, {
         method: 'PATCH',
         headers: { 
           'Content-Type': 'application/json',

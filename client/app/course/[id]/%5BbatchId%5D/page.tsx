@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { useParams, useRouter } from 'next/navigation';
 import { 
   Play, 
@@ -42,8 +43,8 @@ export default function BatchClassroom() {
   const fetchClassroomData = async () => {
     try {
       const [courseRes, batchRes] = await Promise.all([
-        fetch(`http://localhost:5000/api/courses/${courseId}`),
-        fetch(`http://localhost:5000/api/batches/${batchId}`)
+        fetch(`${API_BASE_URL}/api/courses/${courseId}`),
+        fetch(`${API_BASE_URL}/api/batches/${batchId}`)
       ]);
       
       const courseData = await courseRes.json();

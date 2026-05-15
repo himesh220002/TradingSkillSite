@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/api-config';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -112,7 +113,7 @@ export default function BatchDetails() {
 
   const fetchBatch = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/batches/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/batches/${id}`);
       const data = await res.json();
       setBatch(data);
       if (data.startDate) setEditDateValue(new Date(data.startDate).toISOString().split('T')[0]);
@@ -122,7 +123,7 @@ export default function BatchDetails() {
 
   const updateBatchField = async (field: string, value: any) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/batches/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/batches/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: value }),
@@ -138,7 +139,7 @@ export default function BatchDetails() {
 
   const saveStats = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/batches/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/batches/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -169,7 +170,7 @@ export default function BatchDetails() {
   const removeOverride = (idx: number) => updateBatchField('schedule', batch!.schedule.filter((_, i) => i !== idx));
 
   const toggleTopic = async (topicId: string, currentState: boolean) => {
-    const res = await fetch(`http://localhost:5000/api/batches/${id}/topic/${topicId}`, {
+    const res = await fetch(`${API_BASE_URL}/api/batches/${id}/topic/${topicId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isCompleted: !currentState }),

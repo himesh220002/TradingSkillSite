@@ -1,311 +1,299 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { 
   ShieldCheck, 
   Lock, 
-  CreditCard, 
-  Smartphone, 
-  Building2, 
-  Loader2, 
-  CheckCircle2, 
   ArrowRight, 
-  ChevronLeft,
-  AlertCircle
+  CheckCircle2, 
+  CreditCard,
+  Building2,
+  Wallet,
+  Smartphone,
+  ChevronRight,
+  Shield,
+  Zap
 } from "lucide-react";
 
-export default function PaymentGatewayPage() {
+export default function PaymentPage() {
   const { id } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const amount = searchParams.get('amount') || '0';
-  
-  const [method, setMethod] = useState<'card' | 'upi' | 'netbanking'>('card');
+  const [method, setMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
   const [processing, setProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [completed, setCompleted] = useState(false);
 
-  // Form States
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvv, setCvv] = useState('');
-
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const parts = [];
-    for (let i = 0, len = v.length; i < len; i += 4) {
-      parts.push(v.substring(i, i + 4));
-    }
-    if (parts.length > 0) {
-      return parts.join(' ').substring(0, 19);
-    } else {
-      return v;
-    }
-  };
-
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCardNumber(e.target.value);
-    setCardNumber(formatted);
-  };
-
-  const formatExpiry = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    if (v.length > 2) {
-      return `${v.substring(0, 2)} / ${v.substring(2, 4)}`;
-    }
-    return v;
-  };
-
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatExpiry(e.target.value);
-    setExpiry(formatted);
-  };
-
-  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value.replace(/[^0-9]/gi, '').substring(0, 4);
-    setCvv(v);
-  };
+  const price = searchParams.get('amount') || '0';
+  const courseTitle = searchParams.get('course') || 'Course';
 
   const handlePayment = async () => {
     setProcessing(true);
-    setFailed(false);
     
-    // Mimic network delay
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    // Simulate payment gateway delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     
     try {
-      const response = await fetch('http://localhost:5000/api/batches/auto-enroll', {
+      const response = await fetch(`${API_BASE_URL}/api/batches/auto-enroll`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: userData.id,
-          courseId: id,
-          paymentMethod: 'online',
-          amount: parseFloat(amount),
-          transactionId: `PAY-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+          courseId: id
         }),
       });
 
-      const data = await response.json();
       if (response.ok) {
-        setSuccess(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        router.push(`/course/${id}/success?enrollmentId=${data.enrollment._id}`);
-      } else {
-        setFailed(true);
-        setErrorMessage(data.message || 'Payment was declined by the issuer.');
+        setCompleted(true);
+        setTimeout(() => {
+          router.push('/my-learning');
+        }, 3000);
       }
     } catch (error) {
-      setFailed(true);
-      setErrorMessage('Communication with bank failed. Please check your connection.');
+      console.error('Enrollment error:', error);
+      alert('Payment successful but enrollment failed. Please contact support.');
+    } finally {
+      setProcessing(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col items-center justify-center p-4 font-sans transition-colors duration-500">
-      {/* Visual Header */}
-      <div className="w-full max-w-[420px] mb-8 flex justify-between items-center px-2">
-        <div className="flex items-center gap-2 text-slate-400">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Secured by CloudArmor</span>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <Lock className="w-3 h-3" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">256-bit AES</span>
+  if (completed) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-500">
+          <div className="relative inline-block">
+            <div className="w-24 h-24 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto border-4 border-emerald-500/20">
+              <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+            </div>
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center border-4 border-white dark:border-slate-950">
+              <Zap className="w-4 h-4 text-white fill-current" />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight">Payment <span className="text-emerald-500">Verified</span></h1>
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Your institutional access has been provisioned</p>
+          </div>
+
+          <div className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-black/5 dark:border-white/5">
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Redirecting to Terminal</div>
+            <div className="w-full bg-slate-200 dark:bg-slate-800 h-1 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 animate-[progress_3s_ease-in-out]" style={{ width: '100%' }} />
+            </div>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      <div className="w-full max-w-[420px] bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden border border-black/5 dark:border-white/5 relative">
-        {/* Processing Overlay */}
-        {processing && (
-          <div className="absolute inset-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center p-10 text-center space-y-6 animate-in fade-in">
-            {(!success && !failed) && (
-              <>
-                <div className="relative">
-                  <Loader2 className="w-16 h-16 text-emerald-500 animate-spin" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <ShieldCheck className="w-6 h-6 text-emerald-500/50" />
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 pb-20 px-4">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-12 gap-12 items-start">
+        {/* Left Column: Payment Methods */}
+        <div className="md:col-span-7 space-y-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight">Secure <span className="text-emerald-500">Checkout</span></h1>
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Encrypted Institutional Gateway</p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { id: 'upi', label: 'UPI / QR', icon: Smartphone },
+              { id: 'card', label: 'Card', icon: CreditCard },
+              { id: 'netbanking', label: 'Net Banking', icon: Building2 },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setMethod(item.id as any)}
+                className={cn(
+                  "p-6 rounded-[2rem] border-2 transition-all flex flex-col items-center gap-3 group",
+                  method === item.id 
+                    ? "bg-white dark:bg-slate-900 border-emerald-500 shadow-xl shadow-emerald-500/10" 
+                    : "bg-slate-100 dark:bg-slate-900/50 border-transparent hover:border-slate-300 dark:hover:border-slate-700"
+                )}
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
+                  method === item.id ? "bg-emerald-500 text-white" : "bg-white dark:bg-slate-800 text-slate-400 group-hover:text-slate-600"
+                )}>
+                  <item.icon className="w-6 h-6" />
+                </div>
+                <span className={cn(
+                  "text-[10px] font-black uppercase tracking-widest",
+                  method === item.id ? "text-slate-900 dark:text-white" : "text-slate-400"
+                )}>{item.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 border border-black/5 dark:border-white/5 shadow-sm space-y-8">
+            {method === 'upi' && (
+              <div className="space-y-6 animate-in slide-in-from-bottom-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">UPI ID / VPA</label>
+                  <div className="relative">
+                    <Smartphone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                    <input 
+                      type="text" 
+                      placeholder="username@okaxis"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 pl-14 pr-6 text-slate-900 dark:text-white outline-none transition-all font-bold"
+                    />
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Authorizing Payment...</h3>
-                  <p className="text-sm text-slate-500 mt-2">Connecting to secure servers. Please do not refresh.</p>
+                <div className="flex items-center gap-4 py-4">
+                  <div className="h-[1px] flex-grow bg-slate-100 dark:bg-slate-800" />
+                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">or scan qr code</span>
+                  <div className="h-[1px] flex-grow bg-slate-100 dark:bg-slate-800" />
                 </div>
-              </>
+                <div className="flex justify-center">
+                  <div className="p-4 bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-100 dark:border-slate-700 shadow-inner">
+                    <div className="w-48 h-48 bg-slate-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center">
+                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center px-6">Dynamic QR Encryption Active</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
 
-            {success && (
-              <>
-                <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white animate-bounce shadow-xl shadow-emerald-500/20">
-                  <CheckCircle2 className="w-10 h-10" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Verification Successful</h3>
-                  <p className="text-sm text-slate-500 mt-2">Your seat has been reserved. Redirecting to classroom...</p>
-                </div>
-              </>
-            )}
-
-            {failed && (
-              <>
-                <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-white shadow-xl shadow-red-500/20">
-                  <AlertCircle className="w-10 h-10" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Transaction Declined</h3>
-                  <p className="text-sm text-red-500/70 mt-2 font-medium">{errorMessage}</p>
-                </div>
-                <button 
-                  onClick={() => { setProcessing(false); setFailed(false); }}
-                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-full font-bold text-sm hover:scale-105 active:scale-95 transition-all"
-                >
-                  Try Another Method
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Main Content */}
-        <div className="p-8 space-y-8">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Paying To</div>
-              <h2 className="text-lg font-black text-slate-900 dark:text-white">Trading Mastery Pro</h2>
-            </div>
-            <div className="text-right">
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-white">${amount}</div>
-            </div>
-          </div>
-
-          <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
-            <button 
-              onClick={() => setMethod('card')}
-              className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all ${method === 'card' ? 'bg-white dark:bg-slate-700 shadow-sm text-emerald-500' : 'text-slate-400'}`}
-            >
-              <CreditCard className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-bold uppercase">Card</span>
-            </button>
-            <button 
-              onClick={() => setMethod('upi')}
-              className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all ${method === 'upi' ? 'bg-white dark:bg-slate-700 shadow-sm text-emerald-500' : 'text-slate-400'}`}
-            >
-              <Smartphone className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-bold uppercase">UPI</span>
-            </button>
-            <button 
-              onClick={() => setMethod('netbanking')}
-              className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all ${method === 'netbanking' ? 'bg-white dark:bg-slate-700 shadow-sm text-emerald-500' : 'text-slate-400'}`}
-            >
-              <Building2 className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-bold uppercase">NetBank</span>
-            </button>
-          </div>
-
-          {method === 'card' && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Card Number</label>
-                <div className="relative">
+            {method === 'card' && (
+              <div className="space-y-6 animate-in slide-in-from-bottom-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Card Holder Name</label>
                   <input 
                     type="text" 
-                    value={cardNumber}
-                    onChange={handleCardNumberChange}
-                    placeholder="XXXX XXXX XXXX XXXX" 
-                    className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-mono tracking-widest" 
-                    autoComplete="off"
-                  />
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" className="absolute right-4 top-1/2 -translate-y-1/2 h-3 opacity-50" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expiry</label>
-                  <input 
-                    type="text" 
-                    value={expiry}
-                    onChange={handleExpiryChange}
-                    placeholder="MM / YY" 
-                    className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-mono" 
-                    autoComplete="off"
+                    placeholder="INSTITUTIONAL HOLDER"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold uppercase"
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CVV</label>
-                  <input 
-                    type="password" 
-                    value={cvv}
-                    onChange={handleCvvChange}
-                    placeholder="***" 
-                    className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-mono" 
-                    autoComplete="off"
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Card Number</label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                    <input 
+                      type="text" 
+                      placeholder="0000 0000 0000 0000"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 pl-14 pr-6 text-slate-900 dark:text-white outline-none transition-all font-bold font-mono"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Expiry Date</label>
+                    <input 
+                      type="text" 
+                      placeholder="MM / YY"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 px-6 text-slate-900 dark:text-white outline-none transition-all font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">CVV / CVC</label>
+                    <div className="relative">
+                      <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                      <input 
+                        type="password" 
+                        placeholder="•••"
+                        className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl py-4 pl-14 pr-6 text-slate-900 dark:text-white outline-none transition-all font-bold font-mono"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {method === 'upi' && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-              <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-[2rem] flex flex-col items-center gap-4 border border-black/5">
-                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=trading@pro&am=${amount}`} className="w-32 h-32 opacity-80 dark:invert" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scan QR with any UPI App</p>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                  <Smartphone className="w-4 h-4 text-slate-400" />
+            {method === 'netbanking' && (
+              <div className="space-y-6 animate-in slide-in-from-bottom-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {['HDFC Bank', 'ICICI Bank', 'SBI', 'Axis Bank', 'KOTAK', 'Yes Bank'].map(bank => (
+                    <button key={bank} className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-xs font-bold text-slate-600 dark:text-slate-400 text-left flex items-center justify-between group">
+                      {bank}
+                      <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
+                    </button>
+                  ))}
                 </div>
-                <input type="text" placeholder="Enter UPI ID (e.g. user@okhdfc)" className="w-full bg-slate-50 dark:bg-slate-800 pl-12 pr-4 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm" />
               </div>
-            </div>
-          )}
-
-          {method === 'netbanking' && (
-            <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-               <div className="grid grid-cols-3 gap-3">
-                 {['HDFC', 'ICICI', 'SBI', 'AXIS', 'KOTAK', 'PNB'].map(bank => (
-                   <div key={bank} className="p-3 border border-black/5 dark:border-white/5 rounded-xl text-center hover:border-emerald-500 transition-colors cursor-pointer group">
-                      <div className="text-[10px] font-black text-slate-400 group-hover:text-emerald-500">{bank}</div>
-                   </div>
-                 ))}
-               </div>
-               <select className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none text-sm appearance-none border-none">
-                 <option>Select from other banks...</option>
-                 <option>Canara Bank</option>
-                 <option>Union Bank</option>
-               </select>
-            </div>
-          )}
-
-          <div className="space-y-4 pt-4">
-            <button 
-              onClick={handlePayment}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-[2rem] font-black text-lg transition-all shadow-xl shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-3"
-            >
-              Pay ${amount} <ArrowRight className="w-5 h-5" />
-            </button>
-            <div className="text-center">
-              <button 
-                onClick={() => router.back()}
-                className="text-[10px] font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center justify-center gap-2 mx-auto"
-              >
-                <ChevronLeft className="w-3 h-3" /> Cancel & Return
-              </button>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-black/5 dark:border-white/5 flex justify-center items-center gap-6 opacity-40 grayscale">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png" className="h-3" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/1200px-Stripe_Logo%2C_revised_2016.svg.png" className="h-3" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/RuPay.svg/1200px-RuPay.svg.png" className="h-4" />
+        {/* Right Column: Order Summary */}
+        <div className="md:col-span-5 space-y-6">
+          <div className="bg-slate-900 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] -mr-32 -mt-32 group-hover:bg-emerald-500/20 transition-all duration-1000" />
+            
+            <h3 className="text-xl font-black uppercase italic tracking-tight mb-8">Order <span className="text-emerald-500">Manifest</span></h3>
+            
+            <div className="space-y-6 relative z-10">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Active Course</div>
+                  <div className="text-lg font-black leading-tight max-w-[200px]">{courseTitle}</div>
+                </div>
+                <div className="text-2xl font-black text-emerald-500 tracking-tighter">₹{price}</div>
+              </div>
+
+              <div className="h-[1px] bg-white/10" />
+
+              <div className="space-y-4">
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-500 uppercase tracking-widest">Platform Fee</span>
+                  <span className="text-slate-300">₹0.00</span>
+                </div>
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-500 uppercase tracking-widest">Processing</span>
+                  <span className="text-emerald-500 uppercase tracking-widest">Included</span>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <div className="flex justify-between items-end">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1">Total Payable</span>
+                  <div className="text-4xl font-black tracking-tighter">₹{price}</div>
+                </div>
+              </div>
+
+              <button
+                onClick={handlePayment}
+                disabled={processing}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 text-white py-6 rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3 transition-all active:scale-95 mt-4"
+              >
+                {processing ? (
+                  <>
+                    <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Encrypting...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-6 h-6" />
+                    <span>Finalize Connection</span>
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-center gap-6 pt-4 grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">
+                <Shield className="w-8 h-8" />
+                <Lock className="w-6 h-6" />
+                <CreditCard className="w-8 h-8" />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-8 rounded-[2rem] bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 space-y-4">
+            <div className="flex gap-4 items-start">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-emerald-500" />
+              </div>
+              <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase tracking-widest">
+                All transactions are protected by military-grade 256-bit SSL encryption. Your data is never stored on our servers.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+import { cn } from "@/lib/utils";

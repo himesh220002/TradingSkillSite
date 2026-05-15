@@ -1,7 +1,9 @@
 "use client"
 
 import React, { useState } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import { ShieldCheck, Lock, Save, AlertCircle, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AdminSettings() {
   const [newPassword, setNewPassword] = useState('');
@@ -18,7 +20,7 @@ export default function AdminSettings() {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/admin/change-password', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/change-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword }),
@@ -117,4 +119,3 @@ export default function AdminSettings() {
   );
 }
 
-import { cn } from "@/lib/utils";

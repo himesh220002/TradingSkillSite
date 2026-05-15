@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/lib/api-config';
 import Link from 'next/link';
 import {
   Plus,
@@ -51,7 +52,7 @@ export default function AdminBatches() {
 
   const fetchBatches = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/batches');
+      const response = await fetch(`${API_BASE_URL}/api/batches`);
       const data = await response.json();
       setBatches(data);
     } catch (error) {
@@ -63,7 +64,7 @@ export default function AdminBatches() {
 
   const updateBatchField = async (id: string, field: string, value: any) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/batches/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/batches/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: value })
@@ -83,7 +84,7 @@ export default function AdminBatches() {
   const deleteBatch = async (id: string) => {
     if (!confirm('Are you sure you want to delete this batch?')) return;
     try {
-      await fetch(`http://localhost:5000/api/batches/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/api/batches/${id}`, { method: 'DELETE' });
       setBatches(batches.filter(b => b._id !== id));
     } catch (error) {
       console.error('Error deleting batch:', error);
