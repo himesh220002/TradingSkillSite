@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { connectKafka } from './config/kafka.js';
 import courseRoutes from './routes/courseRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import batchRoutes from './routes/batchRoutes.js';
@@ -41,7 +42,10 @@ app.use(express.json());
 const MONGODB_URI = process.env.MONGODB_URI || '';
 
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
+  .then(() => {
+    console.log('✅ Connected to MongoDB');
+    connectKafka();
+  })
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // Routes

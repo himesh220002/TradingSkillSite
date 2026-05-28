@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import { validate } from '../middleware/validate.js';
 import { createBatchSchema, enrollStudentSchema, switchStudentSchema, autoEnrollSchema } from '../schemas/batchSchemas.js';
 import Enrollment from '../models/Enrollment.js';
+import { publishEvent } from '../config/kafka.js';
 
 import Transaction from '../models/Transaction.js';
 import Notification from '../models/Notification.js';
@@ -442,6 +443,32 @@ router.post('/auto-enroll', validate(autoEnrollSchema), async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Error processing auto-enrollment', error });
+  }
+});
+
+// Async Enrollment Endpoint via Kafka
+router.post('/auto-enroll-async', validate(autoEnrollSchema), async (req, res) => {
+  try {
+    const { userId, courseId, paymentMethod, amount, transactionId } = req.body;
+
+    const eventPayload = {
+      userId,
+      courseId,
+      amount,
+      paymentMethod,
+      transactionId,
+      timestamp: new Date().toISOString()
+    };
+
+    // Publish to 'course-purchase' topic
+    await publishEvent('course-purchase', eventPayload);
+
+    res.status(202).json({
+      message: 'Course purchase initiated asynchronously. Processing enrollment...',
+      eventPayload
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error initiating async enrollment', error: error.message });
   }
 });
 
