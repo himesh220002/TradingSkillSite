@@ -6,6 +6,7 @@ import { connectKafka } from './config/kafka.js';
 import courseRoutes from './routes/courseRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import batchRoutes from './routes/batchRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import studentProgressRoutes from './routes/studentProgressRoutes.js';
@@ -56,6 +57,7 @@ app.get('/', (req, res) => {
 app.use('/api/courses', courseRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/batches', batchRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/student-progress', studentProgressRoutes);

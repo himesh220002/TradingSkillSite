@@ -24,38 +24,159 @@ export default function PaymentPage() {
   const [method, setMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
   const [processing, setProcessing] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [inrPrice, setInrPrice] = useState<string | null>(null);
 
   const price = searchParams.get('amount') || '0';
   const courseTitle = searchParams.get('course') || 'Course';
 
+  useEffect(() => {
+    // Dynamically load Razorpay Checkout Script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Fetch live USD to INR conversion
+    const fetchInrPrice = async () => {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data?.result === 'success' && data?.rates?.INR) {
+          const converted = Math.round(Number(price) * data.rates.INR);
+          setInrPrice(converted.toLocaleString('en-IN'));
+        }
+      } catch {
+        // Fallback rate
+        const converted = Math.round(Number(price) * 85);
+        setInrPrice(converted.toLocaleString('en-IN'));
+      }
+    };
+    fetchInrPrice();
+
+  }, [price]);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (!userData.id || completed) return;
+
+    // Poll every 3 seconds to check if payment succeeded (via Webhook)
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/payments/check-enrollment?userId=${userData.id}&courseId=${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.enrolled) {
+            setCompleted(true);
+            clearInterval(interval);
+            setTimeout(() => {
+              router.push('/my-learning');
+            }, 3000);
+          }
+        }
+      } catch (error) {
+        console.error('Error polling enrollment status:', error);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [id, completed, router]);
+
   const handlePayment = async () => {
     setProcessing(true);
     
-    // Simulate payment gateway delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (!userData.id) {
+      alert('User session not found. Please log in.');
+      setProcessing(false);
+      return;
+    }
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/batches/auto-enroll`, {
+      // 1. Fetch Razorpay key ID configuration from backend
+      const configRes = await fetch(`${API_BASE_URL}/api/payments/config`);
+      const { keyId } = await configRes.json();
+
+      if (!keyId) {
+        throw new Error('Razorpay public key ID is not configured on the server.');
+      }
+
+      // 2. Request backend to create a Razorpay Order
+      const orderRes = await fetch(`${API_BASE_URL}/api/payments/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: userData.id,
-          courseId: id
+          courseId: id,
+          amount: Number(price)
         }),
       });
 
-      if (response.ok) {
-        setCompleted(true);
-        setTimeout(() => {
-          router.push('/my-learning');
-        }, 3000);
+      if (!orderRes.ok) {
+        const errData = await orderRes.json();
+        throw new Error(errData.message || 'Failed to initialize order on server');
       }
-    } catch (error) {
-      console.error('Enrollment error:', error);
-      alert('Payment successful but enrollment failed. Please contact support.');
-    } finally {
+
+      const orderData = await orderRes.json(); // contains orderId, amount, currency
+
+      // 3. Open the Razorpay Checkout Modal
+      const options = {
+        key: keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'TradingSkill',
+        description: courseTitle,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          try {
+            setProcessing(true);
+            
+            // 4. Verify transaction signature and trigger enrollment
+            const verifyRes = await fetch(`${API_BASE_URL}/api/payments/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                userId: userData.id,
+                courseId: id,
+                amount: Number(price)
+              }),
+            });
+
+            if (verifyRes.ok) {
+              setCompleted(true);
+              setTimeout(() => {
+                router.push('/my-learning');
+              }, 3000);
+            } else {
+              const errData = await verifyRes.json();
+              alert(errData.message || 'Payment signature verification failed.');
+            }
+          } catch (err: any) {
+            console.error('Verification error:', err);
+            alert('Error during verification: ' + err.message);
+          } finally {
+            setProcessing(false);
+          }
+        },
+        prefill: {
+          name: userData.username || '',
+        },
+        theme: {
+          color: '#10b981', // Emerald theme color
+        },
+        modal: {
+          ondismiss: function() {
+            setProcessing(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (error: any) {
+      console.error('Payment initialization error:', error);
+      alert('Failed to initialize payment gateway: ' + error.message);
       setProcessing(false);
     }
   };
@@ -150,9 +271,11 @@ export default function PaymentPage() {
                 </div>
                 <div className="flex justify-center">
                   <div className="p-4 bg-white dark:bg-slate-800 rounded-3xl border-2 border-slate-100 dark:border-slate-700 shadow-inner">
-                    <div className="w-48 h-48 bg-slate-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center">
-                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center px-6">Dynamic QR Encryption Active</div>
-                    </div>
+                    <img 
+                      src="/Payment system/PaymentQRHimesh.png" 
+                      alt="Razorpay UPI QR Code"
+                      className="w-48 h-48 rounded-2xl object-contain mx-auto"
+                    />
                   </div>
                 </div>
               </div>
@@ -231,7 +354,7 @@ export default function PaymentPage() {
                   <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Active Course</div>
                   <div className="text-lg font-black leading-tight max-w-[200px]">{courseTitle}</div>
                 </div>
-                <div className="text-2xl font-black text-emerald-500 tracking-tighter">₹{price}</div>
+                <div className="text-2xl font-black text-emerald-500 tracking-tighter">₹{inrPrice || price}</div>
               </div>
 
               <div className="h-[1px] bg-white/10" />
@@ -250,7 +373,7 @@ export default function PaymentPage() {
               <div className="pt-4">
                 <div className="flex justify-between items-end">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1">Total Payable</span>
-                  <div className="text-4xl font-black tracking-tighter">₹{price}</div>
+                  <div className="text-4xl font-black tracking-tighter">₹{inrPrice || price}</div>
                 </div>
               </div>
 
