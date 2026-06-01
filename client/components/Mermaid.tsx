@@ -28,8 +28,8 @@ export const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
             if (isMounted) {
               try {
                 const m = (window as any).mermaid;
-                m.initialize({ 
-                  startOnLoad: false, 
+                m.initialize({
+                  startOnLoad: false,
                   theme: 'dark',
                   securityLevel: 'loose',
                   themeVariables: {
@@ -95,9 +95,9 @@ export const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
   }
 
   return (
-    <div 
-      ref={ref} 
-      className="mermaid-chart flex justify-center items-center w-full bg-slate-900/40 p-8 rounded-[2rem] border border-white/5 overflow-auto shadow-inner"
+    <div
+      ref={ref}
+      className="mermaid-chart flex justify-center items-center w-full bg-slate-900 p-4 rounded-[2rem] border border-white/5 overflow-auto shadow-inner"
       dangerouslySetInnerHTML={{ __html: svg || '<div class="text-slate-400 text-xs font-black uppercase tracking-[0.2em] animate-pulse">Synchronizing Diagram...</div>' }}
     />
   );

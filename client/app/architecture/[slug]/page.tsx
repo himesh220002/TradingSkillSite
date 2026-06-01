@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Layers, 
-  HelpCircle, 
-  Table as TableIcon, 
-  Activity, 
+import {
+  ArrowLeft,
+  Layers,
+  HelpCircle,
+  Table as TableIcon,
+  Activity,
   Info,
   ChevronRight
 } from 'lucide-react';
@@ -243,11 +243,11 @@ export default function ArchitectureDetail() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 pb-20 px-4 transition-colors duration-500">
       <div className="max-w-5xl mx-auto space-y-10">
-        
+
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between">
-          <Link 
-            href="/architecture" 
+          <Link
+            href="/architecture"
             className="group inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors"
           >
             <div className="w-8 h-8 rounded-full border border-black/5 dark:border-white/5 bg-white dark:bg-slate-900 flex items-center justify-center group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-colors">
@@ -281,11 +281,10 @@ export default function ArchitectureDetail() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 pb-4 font-black uppercase tracking-widest text-[10px] border-b-2 transition-all relative ${
-                  activeTab === tab.id 
-                    ? 'border-emerald-500 text-emerald-500' 
-                    : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-                }`}
+                className={`flex items-center gap-2 pb-4 font-black uppercase tracking-widest text-[10px] border-b-2 transition-all relative ${activeTab === tab.id
+                  ? 'border-emerald-500 text-emerald-500'
+                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
@@ -296,7 +295,7 @@ export default function ArchitectureDetail() {
 
         {/* Main Display Window */}
         <div className="bg-white dark:bg-slate-900/40 backdrop-blur-md rounded-[3rem] p-6 md:p-10 border border-black/5 dark:border-white/5 shadow-2xl overflow-hidden relative">
-          
+
           {/* Flow Diagram Tab */}
           {activeTab === 'diagram' && (
             <div className="space-y-6 animate-in fade-in zoom-in duration-300">
@@ -308,8 +307,8 @@ export default function ArchitectureDetail() {
           {activeTab === 'details' && (
             <div className="grid md:grid-cols-2 gap-6 animate-in slide-in-from-bottom-6 duration-300">
               {data.concepts.map((concept, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="bg-slate-100 dark:bg-slate-900 rounded-3xl p-6 border border-black/5 dark:border-white/5 space-y-3 shadow-inner hover:scale-[1.02] transition-transform duration-300"
                 >
                   <div className="flex items-center justify-between">
