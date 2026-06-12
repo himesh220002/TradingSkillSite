@@ -22,6 +22,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'https://trading-skill-site.vercel.app',
+  'https://cyphertech.online',
+  'https://www.cyphertech.online',
   'http://localhost:3000'
 ].filter(Boolean);
 
