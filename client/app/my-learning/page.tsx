@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   Clock,
@@ -63,6 +64,7 @@ interface Notification {
 }
 
 export default function MyLearningPage() {
+  const router = useRouter();
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
@@ -72,7 +74,7 @@ export default function MyLearningPage() {
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem('userData') || '{}');
     if (!data.id) {
-      window.location.href = '/portal';
+      router.push('/portal');
       return;
     }
     setUserData(data);

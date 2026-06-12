@@ -55,7 +55,7 @@ export default function PortalPage() {
           localStorage.setItem('userData', JSON.stringify(data.user));
           const searchParams = new URLSearchParams(window.location.search);
           const redirectPath = searchParams.get('redirect') || '/';
-          window.location.href = redirectPath;
+          router.push(redirectPath);
         }
       } else {
         setError(data.message || 'Authentication failed');
