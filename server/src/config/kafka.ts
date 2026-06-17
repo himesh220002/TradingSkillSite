@@ -6,12 +6,24 @@ import Course from '../models/Course.js';
 import Batch from '../models/Batch.js';
 import Notification from '../models/Notification.js';
 
-const kafkaHost = process.env.KAFKA_BOOTSTRAP_SERVERS || 'kafka:9092';
+const kafkaHost = process.env.KAFKA_BOOTSTRAP_SERVERS || 'localhost:29092';
 
-const kafka = new Kafka({
+const kafkaConfig: any = {
   clientId: 'trading-skill-site',
-  brokers: [kafkaHost],
-});
+  brokers: kafkaHost.split(','), // Supports multiple brokers if passed via env
+};
+
+// Enable SASL/SSL for production managed Kafka (e.g., Upstash, Confluent)
+if (process.env.KAFKA_USERNAME && process.env.KAFKA_PASSWORD) {
+  kafkaConfig.ssl = true;
+  kafkaConfig.sasl = {
+    mechanism: process.env.KAFKA_SASL_MECHANISM || 'scram-sha-256', // Upstash default
+    username: process.env.KAFKA_USERNAME,
+    password: process.env.KAFKA_PASSWORD,
+  };
+}
+
+const kafka = new Kafka(kafkaConfig);
 
 export const producer = kafka.producer();
 export const consumer = kafka.consumer({ groupId: 'trading-skill-site-group' });
@@ -72,8 +84,12 @@ export const connectKafka = async () => {
       },
     });
     console.log('🚀 Kafka Consumer is listening for events...');
-  } catch (error) {
-    console.error('❌ Failed to initialize Kafka:', error);
+  } catch (error: any) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('⚠️ Kafka is not running locally. Background events will be skipped.');
+    } else {
+      console.error('❌ Failed to initialize Kafka:', error);
+    }
   }
 };
 

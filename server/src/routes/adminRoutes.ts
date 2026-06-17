@@ -3,7 +3,7 @@ import Config from '../models/Config.js';
 
 const router = express.Router();
 
-const MASTER_PASSWORD = 'tradingskilltrainingpassword123';
+const MASTER_PASSWORD = process.env.MASTER_PASSWORD;
 const DEFAULT_ADMIN_PASSWORD = 'admin123';
 
 // Helper to get or create admin password
@@ -19,17 +19,17 @@ const getAdminPassword = async () => {
 // Admin Login
 router.post('/login', async (req, res) => {
   const { password } = req.body;
-  
+
   try {
     // 1. Check if it's the master password (auto-reset)
     if (password === MASTER_PASSWORD) {
       const config = await getAdminPassword();
       config.value = DEFAULT_ADMIN_PASSWORD;
       await config.save();
-      return res.json({ 
-        success: true, 
+      return res.json({
+        success: true,
         message: 'Master password used. Admin password has been reset to default.',
-        token: 'authenticated' 
+        token: 'authenticated'
       });
     }
 
